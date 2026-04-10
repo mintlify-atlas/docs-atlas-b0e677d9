@@ -1,0 +1,102 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "AI DevKit",
+  "projectDescription": "A universal CLI toolkit that configures AI coding agents (Claude Code, Cursor, Codex, Gemini, and more) with structured workflows, phase templates, persistent memory, and reusable skills.",
+  "theme": "luma",
+  "primaryColor": "#7c7c7c",
+  "lightColor": "#060606",
+  "darkColor": "#cdcdcd",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "supported-agents"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/phases",
+              "concepts/skills",
+              "concepts/memory",
+              "concepts/agent-control"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/configuration",
+              "guides/phase-based-workflow",
+              "guides/managing-skills",
+              "guides/using-memory",
+              "guides/monitoring-agents",
+              "guides/templates"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI Reference",
+        "groups": [
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/init",
+              "cli/phase",
+              "cli/skill",
+              "cli/memory",
+              "cli/agent",
+              "cli/lint",
+              "cli/install",
+              "cli/setup"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "reference/config-file",
+              "reference/skill-registries",
+              "reference/environment-codes"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive init wizard that configures multiple AI agent environments in one step",
+    "Phase-based development workflow (requirements, design, planning, implementation, testing, deployment, monitoring)",
+    "Agent Skill management with registry support — install, remove, search, and update skills",
+    "Persistent knowledge memory service with scoped store and full-text search",
+    "Agent control plane — list running agents, send messages, inspect conversation history",
+    "Workspace lint validation to ensure AI-readiness of your project",
+    "Declarative install via .ai-devkit.json config file for CI/team onboarding",
+    "Global command setup to make AI DevKit commands available across all projects"
+  ],
+  "publicApiSurface": [
+    "ai-devkit init",
+    "ai-devkit phase [name]",
+    "ai-devkit skill add <registry-repo> [skill-name]",
+    "ai-devkit skill list",
+    "ai-devkit skill remove <skill-name>",
+    "ai-devkit skill update [registry-id]",
+    "ai-devkit skill find <keyword>",
+    "ai-devkit skill rebuild-index",
+    "ai-devkit memory store",
+    "ai-devkit memory search",
+    "ai-devkit memory update",
+    "ai-devkit agent list",
+    "ai-devkit agent open <name>",
+    "ai-devkit agent send <message>",
+    "ai-devkit agent detail",
+    "ai-devkit lint",
+    "ai-devkit install",
+    "ai-devkit setup"
+  ]
+}

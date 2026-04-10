@@ -1,0 +1,81 @@
+---
+title: "ai-devkit setup — configure global environments"
+description: "Copy AI DevKit commands to global environment folders so agents can use them across every project on your machine. Requires the --global flag to run."
+---
+
+The `setup` command copies AI DevKit command files into the global configuration folders of your AI environments — for example, Claude Code's `~/.claude/commands/` or the equivalent path for other supported environments. After running setup, the commands are available to agents in every project on your machine without needing to run `ai-devkit init` in each one.
+
+## Synopsis
+
+```bash
+ai-devkit setup [options]
+```
+
+## Options
+
+<ParamField path="-g, --global" type="boolean">
+  Install commands to global environment folders. This flag is required — running `ai-devkit setup` without it prints usage guidance and exits.
+</ParamField>
+
+## What it does
+
+When you run `ai-devkit setup --global`, the command:
+
+1. Prompts you to select which AI environments to configure globally.
+2. For each selected environment, locates the global command path (e.g., `~/<env-path>/commands/`).
+3. If commands already exist at that path, asks whether to overwrite them.
+4. Copies the AI DevKit command files and reports how many files were written.
+
+<Note>
+  Not all environments support global setup. If you select an environment that does not have a `globalCommandPath` defined, the command reports an error for that environment and continues with the others.
+</Note>
+
+<Warning>
+  `ai-devkit setup` without `--global` does nothing and prints a usage reminder. The flag is intentionally required to prevent accidental global modifications.
+</Warning>
+
+## Examples
+
+### Install commands globally
+
+```bash
+ai-devkit setup --global
+```
+
+The command then prompts you to select environments interactively and copies commands to each selected global folder.
+
+### Typical output
+
+```
+Global Setup
+
+This will copy AI DevKit commands to your global environment folders.
+
+? Select environments to set up globally: Claude Code
+
+Setting up Claude Code...
+  Global path: ~/.claude/commands
+
+Copied 5 commands to Claude Code global folder
+     • phase.md
+     • init.md
+     • ...
+
+Global setup completed successfully!
+Your commands are now available globally for the selected environments.
+```
+
+<Tip>
+  Run `ai-devkit setup --global` once after installing AI DevKit on a new machine. You can re-run it at any time to update global commands after upgrading to a newer version of AI DevKit.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="init" icon="square-terminal" href="/cli/init">
+    Initialize AI DevKit in a specific project directory.
+  </Card>
+  <Card title="install" icon="square-terminal" href="/cli/install">
+    Install AI DevKit artifacts from a config file in CI or automated environments.
+  </Card>
+</CardGroup>

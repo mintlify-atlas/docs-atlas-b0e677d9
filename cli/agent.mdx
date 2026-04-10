@@ -1,0 +1,199 @@
+---
+title: "ai-devkit agent — monitor and control AI agents"
+description: "List, focus, and message running AI agents. Supports Claude Code and Codex. Subcommands: list, open, send, detail. Key flags: --id, --full, --tail."
+---
+
+The `agent` command group lets you observe and interact with AI agents running on your machine. You can list all active agents with their status and current task, switch focus to an agent's terminal window, send a message to an agent waiting for input, and inspect the full conversation history of any agent session. Agents are detected automatically — no configuration required.
+
+## Subcommands
+
+- [`agent list`](#agent-list) — Show all running agents
+- [`agent open`](#agent-open) — Focus an agent's terminal window
+- [`agent send`](#agent-send) — Send a message to a running agent
+- [`agent detail`](#agent-detail) — Show detailed agent info and conversation history
+
+---
+
+## agent list
+
+List all AI agents currently running on your machine.
+
+### Synopsis
+
+```bash
+ai-devkit agent list [options]
+```
+
+### Options
+
+<ParamField path="-j, --json" type="boolean">
+  Output the agent list as JSON instead of the default table view. Useful for scripting or piping into other tools.
+</ParamField>
+
+### Output
+
+The table view shows each agent's name, working directory, agent type (Claude Code, Codex, Gemini CLI, or Other), status, current task summary, and time since last activity.
+
+**Status values:**
+
+| Status | Meaning |
+|---|---|
+| `run` | Actively executing a task |
+| `wait` | Waiting for user input |
+| `idle` | Running but not doing anything |
+| `unknown` | Status could not be determined |
+
+<Note>
+  If any agents are in `wait` status, the command prints a summary footer indicating how many agents need input. Use `agent send` to respond to them.
+</Note>
+
+### Examples
+
+```bash
+# List agents in table format
+ai-devkit agent list
+
+# Output as JSON
+ai-devkit agent list --json
+```
+
+---
+
+## agent open
+
+Focus the terminal window of a running agent by name.
+
+### Synopsis
+
+```bash
+ai-devkit agent open <name>
+```
+
+### Arguments
+
+<ParamField path="name" type="string" required>
+  The name of the agent to focus. Partial matches are accepted. If multiple agents match, an interactive prompt lets you pick one.
+</ParamField>
+
+### Examples
+
+```bash
+# Focus an agent by name
+ai-devkit agent open my-agent
+
+# Partial name matching
+ai-devkit agent open "claude"
+```
+
+<Note>
+  The `open` command requires the agent process to have an associated terminal window with a detectable PID. If no terminal is found, the command reports an error.
+</Note>
+
+---
+
+## agent send
+
+Send a text message to a running agent that is waiting for input.
+
+### Synopsis
+
+```bash
+ai-devkit agent send <message> --id <identifier>
+```
+
+### Arguments
+
+<ParamField path="message" type="string" required>
+  The message text to send to the agent.
+</ParamField>
+
+### Options
+
+<ParamField path="--id" type="string" required>
+  Agent name or partial match to identify the target agent. If the identifier matches multiple agents, the command asks you to be more specific.
+</ParamField>
+
+### Examples
+
+```bash
+# Send a message to a specific agent
+ai-devkit agent send "yes, proceed with the changes" --id my-agent
+
+# Use a partial name match
+ai-devkit agent send "approved" --id "claude"
+```
+
+<Warning>
+  If the target agent is not in `wait` status, the command sends the message anyway but prints a warning. Sending to a busy agent may have unexpected effects depending on the agent implementation.
+</Warning>
+
+---
+
+## agent detail
+
+Show detailed information about a running agent, including session metadata and conversation history.
+
+### Synopsis
+
+```bash
+ai-devkit agent detail --id <name> [options]
+```
+
+### Options
+
+<ParamField path="--id" type="string" required>
+  Agent name as shown in `agent list`. If multiple agents match, the command asks you to be more specific.
+</ParamField>
+
+<ParamField path="-j, --json" type="boolean">
+  Output the full detail payload as JSON, including session ID, CWD, start time, status, and conversation messages.
+</ParamField>
+
+<ParamField path="--full" type="boolean">
+  Show the entire conversation history. By default, only the last 20 messages are shown.
+</ParamField>
+
+<ParamField path="--tail" type="number" default="20">
+  Show the last N messages from the conversation history. Ignored when `--full` is used.
+</ParamField>
+
+<ParamField path="--verbose" type="boolean">
+  Include tool call and tool result messages in the conversation output. By default these are hidden to keep the output readable.
+</ParamField>
+
+### Output
+
+The human-readable view shows:
+- Session ID, working directory, start time, last active time, status, and agent type
+- A conversation log with timestamps, role labels (user / assistant), and message content
+
+### Examples
+
+```bash
+# Show the last 20 messages for an agent
+ai-devkit agent detail --id my-agent
+
+# Show the full conversation history
+ai-devkit agent detail --id my-agent --full
+
+# Show last 50 messages, including tool calls
+ai-devkit agent detail --id my-agent --tail 50 --verbose
+
+# Output as JSON for programmatic use
+ai-devkit agent detail --id my-agent --json
+```
+
+<Tip>
+  Use `--tail 5` for a quick status check on what an agent is currently doing, and `--full --verbose` when diagnosing a stuck or failing agent session.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="memory" icon="square-terminal" href="/cli/memory">
+    Search knowledge items and send relevant context to a waiting agent with `agent send`.
+  </Card>
+  <Card title="lint" icon="square-terminal" href="/cli/lint">
+    Validate your workspace before handing it off to an agent.
+  </Card>
+</CardGroup>

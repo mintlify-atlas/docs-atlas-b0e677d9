@@ -1,0 +1,123 @@
+---
+title: "How AI DevKit's persistent memory service works"
+description: "AI DevKit's memory stores project knowledge in a local SQLite database. Agents store, search, and retrieve facts across sessions using scopes and tags."
+---
+
+AI agents start every session with no memory of previous work. They forget the architecture decisions you made last week, the quirks of your deployment pipeline, and the context behind every naming choice. AI DevKit's memory service solves this by maintaining a local SQLite database your agents can write to, search, and read — across sessions, across days, and across an entire project's lifetime.
+
+## How memory works
+
+The memory service stores knowledge items, each with a title, content, optional tags, and a scope that controls visibility. Full-text search makes it fast to retrieve relevant items by keyword. Agents interact with memory via the CLI or through the built-in MCP server mode, which exposes the same operations as tools an AI can call directly.
+
+## Scopes
+
+Every memory item is stored at a specific scope. Scopes let you keep personal notes separate from team-wide knowledge or project-specific context.
+
+| Scope | Format | When to use |
+|---|---|---|
+| Global | `global` | Knowledge that applies to all projects and repos (personal preferences, general patterns) |
+| Project | `project:<name>` | Knowledge tied to a named project (architectural decisions, design rationale) |
+| Repository | `repo:<name>` | Knowledge about a specific repository (file layout, build quirks, testing notes) |
+
+<Info>
+  If you do not specify a scope, memory defaults to `global`.
+</Info>
+
+## Operations
+
+### Store a knowledge item
+
+Save a new item with a title, content body, optional tags, and a scope.
+
+```bash
+ai-devkit memory store \
+  --title "Authentication uses JWT with 24h expiry" \
+  --content "All API routes require a Bearer token. Tokens are signed with RS256. The signing key is loaded from the AUTH_PRIVATE_KEY env variable. Refresh tokens are not implemented." \
+  --tags "auth,api,security" \
+  --scope "repo:my-api"
+```
+
+**Options:**
+
+| Flag | Required | Description |
+|---|---|---|
+| `-t, --title` | Yes | Title of the item (10–100 characters) |
+| `-c, --content` | Yes | Content body (50–5000 characters) |
+| `--tags` | No | Comma-separated tags (e.g., `"api,backend"`) |
+| `-s, --scope` | No | Scope identifier (defaults to `global`) |
+
+### Search knowledge
+
+Retrieve items matching a free-text query. Results are ranked by relevance. Use tags and scope to narrow results.
+
+```bash
+ai-devkit memory search --query "authentication token"
+```
+
+```bash
+# Filter by scope
+ai-devkit memory search --query "deployment" --scope "project:my-app"
+
+# Boost results matching specific tags
+ai-devkit memory search --query "database" --tags "postgres,migrations"
+
+# Display as a table (id, title, scope)
+ai-devkit memory search --query "api" --table
+
+# Return more results
+ai-devkit memory search --query "testing" --limit 10
+```
+
+**Options:**
+
+| Flag | Required | Description |
+|---|---|---|
+| `-q, --query` | Yes | Search query (3–500 characters) |
+| `--tags` | No | Context tags to boost matching results |
+| `-s, --scope` | No | Restrict results to this scope |
+| `-l, --limit` | No | Maximum results to return (1–20, default 5) |
+| `--table` | No | Format output as a table |
+
+### Update an existing item
+
+Update the title, content, tags, or scope of an item you have already stored. Use the item ID from a previous search result.
+
+```bash
+ai-devkit memory update \
+  --id "abc123" \
+  --content "Updated deployment notes after migrating to Kubernetes." \
+  --tags "deploy,k8s"
+```
+
+**Options:**
+
+| Flag | Required | Description |
+|---|---|---|
+| `--id` | Yes | ID of the item to update |
+| `-t, --title` | No | New title |
+| `-c, --content` | No | New content body |
+| `--tags` | No | New tags (replaces existing tags) |
+| `-s, --scope` | No | New scope |
+
+## MCP server mode
+
+The `@ai-devkit/memory` package can also run as a Model Context Protocol (MCP) server. In MCP mode, it exposes `store`, `search`, and `update` as tools that an AI agent can call directly — no CLI invocation required. This is how agents write to memory autonomously during a session.
+
+<Tip>
+  Pair the memory system with the `capture-knowledge` skill (`ai-devkit skill add codeaholicguy/ai-devkit capture-knowledge`) to teach your agent when and what to store.
+</Tip>
+
+## Database location
+
+By default, the SQLite database is stored at a path resolved from your project's `.ai-devkit.json` configuration. You can override this with the `memory.path` field in the config file to share a database across multiple repos in a monorepo, or to place it outside your project directory.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Using memory" icon="brain" href="/guides/using-memory">
+    A practical guide to building a persistent knowledge base for your project.
+  </Card>
+  <Card title="CLI: memory command" icon="square-terminal" href="/cli/memory">
+    Full reference for all `ai-devkit memory` subcommands and flags.
+  </Card>
+</CardGroup>

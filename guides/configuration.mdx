@@ -1,0 +1,135 @@
+---
+title: "AI DevKit project configuration with .ai-devkit.json"
+description: "Configure AI DevKit using .ai-devkit.json to set environments, phases, skills, memory path, and docs directory. Covers all options and their defaults."
+---
+
+AI DevKit stores all project-level configuration in a single file, `.ai-devkit.json`, at the root of your repository. This file is created automatically when you run `ai-devkit init` and is updated as you add environments, phases, and skills. You can also edit it by hand to fine-tune paths, memory settings, or custom registries.
+
+## Config file shape
+
+The `.ai-devkit.json` file maps directly to the `DevKitConfig` interface:
+
+```typescript
+interface DevKitConfig {
+  version: string;
+  paths?: {
+    docs?: string;
+  };
+  memory?: {
+    path?: string;
+  };
+  environments: EnvironmentCode[];
+  phases: Phase[];
+  skills?: ConfigSkill[];
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+## Example config file
+
+This is the `.ai-devkit.json` from the AI DevKit repository itself:
+
+```json
+{
+  "version": "0.4.2",
+  "environments": [
+    "cursor",
+    "claude",
+    "github",
+    "gemini",
+    "codex",
+    "antigravity"
+  ],
+  "createdAt": "2025-12-28T13:35:45.251Z",
+  "updatedAt": "2026-04-03T18:41:38.363Z",
+  "phases": [
+    "requirements",
+    "design",
+    "planning",
+    "implementation",
+    "testing"
+  ],
+  "skills": [
+    {
+      "registry": "codeaholicguy/ai-devkit",
+      "name": "dev-lifecycle"
+    },
+    {
+      "registry": "codeaholicguy/ai-devkit",
+      "name": "tdd"
+    }
+  ]
+}
+```
+
+## Field reference
+
+<ParamField body="version" type="string" required>
+  The version of AI DevKit that created or last updated this config file. Updated automatically on each write.
+</ParamField>
+
+<ParamField body="environments" type="EnvironmentCode[]" required>
+  The list of AI environments configured for this project. Each entry corresponds to a supported agent tool.
+  Valid values: `cursor`, `claude`, `github`, `gemini`, `codex`, `windsurf`, `kilocode`, `amp`, `opencode`, `roo`, `antigravity`.
+</ParamField>
+
+<ParamField body="phases" type="Phase[]" required>
+  The development phases that have been initialized in this project. Each entry maps to a context document in the docs directory.
+  Valid values: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`.
+</ParamField>
+
+<ParamField body="skills" type="ConfigSkill[]">
+  The list of skills installed in this project. Each entry records the registry and skill name so they can be reinstalled with `ai-devkit install`.
+</ParamField>
+
+<ParamField body="paths.docs" type="string">
+  The directory where AI DevKit writes phase context documents and environment configuration files. Defaults to `docs/ai` if not set.
+</ParamField>
+
+<ParamField body="memory.path" type="string">
+  Path to the SQLite database file used by the memory service. Accepts absolute paths or paths relative to the project root. When not set, the memory service uses `~/.ai-devkit/memory.db`.
+</ParamField>
+
+<ParamField body="createdAt" type="string">
+  ISO 8601 timestamp set when the config file was first created. Managed automatically.
+</ParamField>
+
+<ParamField body="updatedAt" type="string">
+  ISO 8601 timestamp updated on every write to the config file. Managed automatically.
+</ParamField>
+
+## Customizing the docs directory
+
+By default, AI DevKit writes phase documents and environment context files to `docs/ai/`. To use a different path, pass `--docs-dir` to `init`:
+
+```bash
+ai-devkit init --docs-dir custom/path
+```
+
+This writes `"paths": { "docs": "custom/path" }` into `.ai-devkit.json` and all subsequent commands will read and write phase files there.
+
+<Tip>
+  If you already initialized the project and want to change the docs directory, edit `paths.docs` in `.ai-devkit.json` directly and move your existing phase files to the new location.
+</Tip>
+
+## Adding custom skill registries
+
+By default, AI DevKit resolves skill registries from the central registry at `github.com/codeaholicguy/ai-devkit`. You can add your own registries by adding a `registries` field directly to `.ai-devkit.json`:
+
+```json
+{
+  "version": "0.4.2",
+  "environments": ["claude"],
+  "phases": ["requirements"],
+  "registries": {
+    "myorg/internal-skills": "https://github.com/myorg/internal-skills.git"
+  }
+}
+```
+
+Each key is the registry identifier you use with `ai-devkit skill add`, and the value is the Git URL of the repository. Project-level registries are merged with any global registries and the default registry, with project registries taking highest priority.
+
+<Note>
+  Registry entries are looked up as `<owner>/<repo>` identifiers. Make sure the repository follows the AI DevKit skill layout — skills must live under a `skills/` directory, and each skill must contain a `SKILL.md` file.
+</Note>

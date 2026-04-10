@@ -1,0 +1,95 @@
+---
+title: "ai-devkit install — install from project config"
+description: "Install AI DevKit environments, phases, and skills from .ai-devkit.json. Ideal for CI pipelines and team onboarding. Key flags: --config, --overwrite."
+---
+
+The `install` command reads an existing AI DevKit config file and installs the declared environments, phase templates, and skills into the current directory. It is the non-interactive counterpart to `ai-devkit init` — instead of prompting for selections, it applies exactly what is specified in the config. This makes it well-suited for CI pipelines, Docker build steps, and onboarding scripts where interactive input is not available.
+
+## Synopsis
+
+```bash
+ai-devkit install [options]
+```
+
+## Options
+
+<ParamField path="-c, --config" type="string" default=".ai-devkit.json">
+  Path to the config file to install from. Defaults to `.ai-devkit.json` in the current directory.
+</ParamField>
+
+<ParamField path="--overwrite" type="boolean">
+  Overwrite existing install artifacts. By default, files that already exist are skipped and counted as warnings rather than failures.
+</ParamField>
+
+## What it does
+
+When you run `ai-devkit install`, the command:
+
+1. Loads and validates the config file at the specified path.
+2. Checks that at least one of `environments`, `phases`, or `skills` is declared.
+3. Reconciles the declared state against what is already installed on disk.
+4. Installs missing environments, phase templates, and skills.
+5. Prints an install summary showing counts of installed, skipped, and failed items.
+
+<Note>
+  If the config file declares no installable entries (no environments, phases, or skills), the command exits with a non-zero code and suggests what to add.
+</Note>
+
+<Warning>
+  Skill install failures are reported as warnings and do not affect the exit code. All other failures (environment or phase) do affect the exit code.
+</Warning>
+
+## Install summary
+
+After installation, the command prints a summary similar to:
+
+```
+Install Summary
+  ✓ 2 environment(s) installed
+  ⚠ 1 environment(s) skipped
+  ✓ 3 phase template(s) installed
+  ✓ 1 skill(s) installed
+```
+
+Any warnings (such as skipped files when `--overwrite` is not set) are listed below the summary.
+
+## Examples
+
+### Install from the default config
+
+```bash
+ai-devkit install
+```
+
+### Install from a custom config path
+
+```bash
+ai-devkit install --config ./configs/.ai-devkit.json
+```
+
+### Overwrite existing artifacts
+
+```bash
+ai-devkit install --overwrite
+```
+
+### Use in a CI pipeline
+
+```bash
+ai-devkit install --config .ai-devkit.json && echo "AI DevKit ready"
+```
+
+<Tip>
+  Commit your `.ai-devkit.json` to version control and add `ai-devkit install` to your project setup script or `Makefile`. New team members get the full AI DevKit configuration in a single command.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="init" icon="square-terminal" href="/cli/init">
+    The interactive way to create a config file and install AI DevKit for the first time.
+  </Card>
+  <Card title="lint" icon="square-terminal" href="/cli/lint">
+    Validate the installed workspace to confirm all expected files are in place.
+  </Card>
+</CardGroup>

@@ -1,0 +1,44 @@
+---
+title: "What is AI DevKit? Overview of features and concepts"
+description: "AI DevKit is a CLI that gives AI coding agents structured workflows, phase templates, and persistent memory. Works with Claude Code, Cursor, and Codex."
+---
+
+AI DevKit is a universal CLI toolkit that gives AI coding agents the same structured workflows, persistent memory, and reusable skills that senior engineers rely on. Instead of starting each session from scratch, agents initialized with AI DevKit follow consistent phase-based processes, remember project context across sessions, and draw on community-built skill libraries — regardless of which agent you use.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get AI DevKit running in your project in under a minute.
+  </Card>
+  <Card title="Supported agents" icon="robot" href="/supported-agents">
+    See which AI coding agents are supported and what features each one gets.
+  </Card>
+  <Card title="Phase-based workflow" icon="list-check" href="/concepts/phases">
+    Structure development into requirements, design, planning, and implementation phases.
+  </Card>
+  <Card title="Agent skills" icon="puzzle-piece" href="/concepts/skills">
+    Install reusable agent skills from community registries with a single command.
+  </Card>
+  <Card title="Knowledge memory" icon="brain" href="/concepts/memory">
+    Give agents persistent knowledge that survives across sessions.
+  </Card>
+  <Card title="CLI reference" icon="square-terminal" href="/cli/init">
+    Complete reference for all `ai-devkit` commands, flags, and configuration options.
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Phase templates" icon="file-code" href="/concepts/phases">
+    Seven structured development phases — requirements, design, planning, implementation, testing, deployment, and monitoring — each with tailored AI context documents written to your `docs/ai/` directory.
+  </Card>
+  <Card title="Multi-agent support" icon="layer-group" href="/supported-agents">
+    Configure Claude Code, Cursor, Codex, Gemini, opencode, and more from a single `init` command. Add or swap agents at any time.
+  </Card>
+  <Card title="Skill registry" icon="wand-magic-sparkles" href="/concepts/skills">
+    A community-driven registry of reusable SKILL.md files. Install debugging guides, TDD workflows, code review checklists, and more with `ai-devkit skill add`.
+  </Card>
+  <Card title="Persistent memory" icon="database" href="/concepts/memory">
+    A local memory service backed by SQLite so agents can store and retrieve project knowledge with full-text search across sessions.
+  </Card>
+</CardGroup>

@@ -1,0 +1,111 @@
+---
+title: "ai-devkit init — set up AI DevKit in a project"
+description: "Initialize AI DevKit: select AI environments, development phases, and docs path. Supports template-driven setup from YAML or JSON. Key flags: --all, --template, --environment."
+---
+
+The `init` command is the starting point for every AI DevKit project. It walks you through selecting one or more AI environments (such as Claude Code or Cursor), choosing which development phases to scaffold, and optionally pointing to a custom docs directory. Running `init` writes environment configuration files, copies phase templates, and creates a `.ai-devkit.json` config file in your project root.
+
+## Synopsis
+
+```bash
+ai-devkit init [options]
+```
+
+## Options
+
+<ParamField path="-e, --environment" type="string">
+  The AI environment(s) to configure. Accepts a comma-separated list of valid environment codes (e.g., `claude`, `cursor`, `codex`). If omitted, an interactive prompt lets you select from all supported environments. See [environment codes](/reference/environment-codes) for the full list of valid values.
+</ParamField>
+
+<ParamField path="-a, --all" type="boolean">
+  Initialize all seven development phases without prompting. Equivalent to selecting every phase in the interactive wizard.
+</ParamField>
+
+<ParamField path="-p, --phases" type="string">
+  Comma-separated list of phases to initialize. Accepted values: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`.
+</ParamField>
+
+<ParamField path="-t, --template" type="string">
+  Path to a template file (`.yaml`, `.yml`, or `.json`) that defines environments, phases, a docs path, and skills to install. When a template is provided, interactive prompts are skipped and the config is applied directly.
+</ParamField>
+
+<ParamField path="-d, --docs-dir" type="string">
+  Custom directory for AI documentation files. Defaults to `docs/ai`.
+</ParamField>
+
+## What it does
+
+When you run `ai-devkit init`, the command:
+
+1. Checks for an existing Git repository and initializes one if none is found.
+2. Prompts you to select AI environments (skipped if `--environment` or a template is provided).
+3. Prompts you to select phases (skipped if `--all`, `--phases`, or a template is provided).
+4. Creates or updates `.ai-devkit.json` with your selections.
+5. Writes environment configuration files for each selected environment.
+6. Copies the chosen phase template files into your docs directory.
+7. If using a template with skills, installs each skill from the specified registries.
+
+<Note>
+  If AI DevKit is already initialized, the command asks whether you want to reconfigure. In template mode (`--template`), it overwrites the existing configuration without prompting.
+</Note>
+
+## Examples
+
+### Interactive setup
+
+Run without flags to use the guided wizard:
+
+```bash
+ai-devkit init
+```
+
+### Target a specific environment
+
+```bash
+ai-devkit init --environment claude
+```
+
+### Initialize all phases for multiple environments
+
+```bash
+ai-devkit init --environment cursor,claude --all
+```
+
+### Initialize specific phases only
+
+```bash
+ai-devkit init --phases requirements,design,planning
+```
+
+### Use a custom docs directory
+
+```bash
+ai-devkit init --docs-dir .docs/ai
+```
+
+### Initialize from a template file
+
+```bash
+ai-devkit init --template ./team-template.yaml
+```
+
+<Tip>
+  Templates are useful for onboarding new team members or enforcing a standard project setup across a monorepo. Define environments, phases, and skills once in a YAML file and pass it to `init`.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="phase" icon="square-terminal" href="/cli/phase">
+    Add or reinitialize a single development phase after the initial setup.
+  </Card>
+  <Card title="install" icon="square-terminal" href="/cli/install">
+    Install AI DevKit artifacts from an existing config file, useful for CI or team onboarding.
+  </Card>
+  <Card title="setup" icon="square-terminal" href="/cli/setup">
+    Copy AI DevKit commands to global environment folders so every project can use them.
+  </Card>
+  <Card title="skill" icon="square-terminal" href="/cli/skill">
+    Add, remove, and update agent skills independently of the init workflow.
+  </Card>
+</CardGroup>

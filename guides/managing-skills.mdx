@@ -1,0 +1,143 @@
+---
+title: "How to install and manage AI DevKit agent skills"
+description: "Install reusable skills from community registries, list what's installed, remove skills, and search across available skills using ai-devkit skill commands."
+---
+
+Skills are structured `SKILL.md` files that teach an AI agent how to perform a specific task — test-driven development, debugging, code review, and more. They are installed from GitHub-hosted registries and placed directly into the skill directories your agent tool reads. Once installed, your agent picks them up automatically in every session.
+
+## The skill workflow
+
+<Steps>
+  <Step title="Search for a skill">
+    Use `skill find` to search across all configured registries by keyword. The search index is fetched automatically on first use and refreshed every 24 hours.
+
+    ```bash
+    ai-devkit skill find tdd
+    ```
+
+    The output shows matching skill names, their registries, and a short description:
+
+    ```
+    Found 2 skill(s) matching "tdd":
+
+    Skill Name              Registry                    Description
+    tdd                     codeaholicguy/ai-devkit     Test-driven development — write a failing test...
+    test-driven-development obra/superpowers            Use when implementing any feature or bugfix...
+    ```
+
+    To force a fresh index rebuild:
+
+    ```bash
+    ai-devkit skill find tdd --refresh
+    ```
+  </Step>
+
+  <Step title="Install a skill">
+    Install a specific skill from a registry using `skill add`:
+
+    ```bash
+    ai-devkit skill add codeaholicguy/ai-devkit tdd
+    ```
+
+    The CLI clones the registry repository to `~/.ai-devkit/skills/` (or updates it if already cached), then symlinks the skill into the appropriate directories for your configured environments.
+  </Step>
+
+  <Step title="Install multiple skills interactively">
+    Omit the skill name to get an interactive checklist of all skills in a registry. Use the space bar to select multiple skills, then press Enter to install them all:
+
+    ```bash
+    ai-devkit skill add codeaholicguy/ai-devkit
+    ```
+
+    This is the easiest way to browse and install from a registry you haven't used before.
+  </Step>
+
+  <Step title="Install a skill globally">
+    Global installation places the skill in your agent's user-level skill directory (e.g., `~/.claude/skills/` for Claude Code) rather than the project directory. Use `--global` together with `--env` to specify which agent:
+
+    ```bash
+    ai-devkit skill add --global --env claude codeaholicguy/ai-devkit debug
+    ```
+
+    Globally installed skills are available in all projects, not just the current one.
+  </Step>
+
+  <Step title="List installed skills">
+    See all skills currently installed in the project:
+
+    ```bash
+    ai-devkit skill list
+    ```
+
+    The output shows each skill name, which registry it came from, and which environments it is installed for:
+
+    ```
+    Installed Skills:
+
+    Skill Name    Registry                  Environments
+    tdd           codeaholicguy/ai-devkit   cursor, claude
+    debug         codeaholicguy/ai-devkit   cursor, claude
+    dev-lifecycle codeaholicguy/ai-devkit   cursor, claude
+    ```
+  </Step>
+
+  <Step title="Update skills">
+    Pull the latest version of all cached registries and update the installed skill files:
+
+    ```bash
+    ai-devkit skill update
+    ```
+
+    To update only a specific registry:
+
+    ```bash
+    ai-devkit skill update codeaholicguy/ai-devkit
+    ```
+  </Step>
+
+  <Step title="Remove a skill">
+    Unlink a skill from the project's environment directories:
+
+    ```bash
+    ai-devkit skill remove tdd
+    ```
+
+    This removes the skill from your project's agent directories. The cached copy in `~/.ai-devkit/skills/` is preserved so you can reinstall without re-cloning.
+  </Step>
+</Steps>
+
+## Notable registries
+
+<CardGroup cols={2}>
+  <Card title="codeaholicguy/ai-devkit" icon="box" href="/reference/skill-registries">
+    The official AI DevKit registry. Includes skills for TDD, debugging, the dev lifecycle, memory, code simplification, technical writing, and more.
+  </Card>
+  <Card title="anthropics/skills" icon="box" href="/reference/skill-registries">
+    Skills maintained by the Anthropic community, focusing on Claude Code workflows.
+  </Card>
+  <Card title="obra/superpowers" icon="box" href="/reference/skill-registries">
+    A community registry with advanced and experimental skills.
+  </Card>
+  <Card title="Your own registry" icon="code" href="/reference/skill-registries">
+    Host a GitHub repository following the skill layout to create a private or team registry.
+  </Card>
+</CardGroup>
+
+## The skill cache
+
+When you install a skill, AI DevKit clones the full registry repository to `~/.ai-devkit/skills/<owner>/<repo>/`. On subsequent installs from the same registry, it updates (pulls) the cached repo rather than re-cloning. This means skill installation is fast after the first use and works offline if the cache is already populated.
+
+<Note>
+  Removing a skill with `ai-devkit skill remove` only unlinks it from your project directories. The source files remain in `~/.ai-devkit/skills/` so other projects that use the same skill are not affected.
+</Note>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="skill command" icon="terminal" href="/cli/skill">
+    Full CLI reference for all `ai-devkit skill` subcommands.
+  </Card>
+  <Card title="Skill registries" icon="list" href="/reference/skill-registries">
+    Browse available registries and learn how to create your own.
+  </Card>
+</CardGroup>

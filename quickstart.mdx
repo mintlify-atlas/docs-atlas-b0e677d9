@@ -1,80 +1,126 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quickstart: configure AI DevKit for your project"
+description: "Install AI DevKit and configure your first AI coding agent in under a minute. Covers init, environment selection, phase setup, and first skill install."
 ---
 
-## Get started in three steps
+AI DevKit sets up your project for AI-assisted development through an interactive wizard. The steps below walk you from a blank directory to a fully configured workspace with agent templates, phase documents, and your first installed skill.
 
-Get your documentation site running locally and make your first customization.
+<Note>
+  AI DevKit requires Node.js 20.20.0 or higher. Run `node --version` to check your version before proceeding.
+</Note>
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Run the init wizard">
+    In your project root, run:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    npx ai-devkit@latest init
+    ```
 
-### Step 2: Deploy your changes
+    This launches an interactive setup wizard. If AI DevKit has not been initialized in this directory before, the wizard proceeds immediately. If a configuration already exists, it asks whether you want to reconfigure.
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+  <Step title="Select AI environments">
+    The wizard prompts you to select one or more AI coding agents to configure. Use the spacebar to select, then Enter to confirm.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    ```
+    ? Select AI environments to set up (use space to select, enter to confirm):
+     ◯ Claude Code
+     ◯ Cursor
+     ◯ GitHub Copilot
+     ◯ Gemini CLI
+     ◯ Codex CLI
+     ◯ opencode
+     ◯ Antigravity
+     ◯ Windsurf
+     ◯ Kilo Code
+     ◯ Roo Code
+     ◯ Amp
+    ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    Each selected environment gets a dedicated context file and command configuration written to your project. You can add more environments later by running `npx ai-devkit init` again.
+  </Step>
 
-### Step 3: Go live
+  <Step title="Select development phases">
+    Next, choose which development phases to enable. Each phase creates a structured context document in `docs/ai/` that guides the agent through that stage of work.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    ```
+    ? Select phases to initialize:
+     ◯ Requirements & Problem Understanding
+     ◯ System Design & Architecture
+     ◯ Project Planning & Task Breakdown
+     ◯ Implementation Guide
+     ◯ Testing Strategy
+     ◯ Deployment Strategy
+     ◯ Monitoring & Observability
+    ```
+
+    To enable all phases at once, use the `--all` flag:
+
+    ```bash
+    npx ai-devkit@latest init --all
+    ```
+
+    You can add individual phases later with:
+
+    ```bash
+    npx ai-devkit phase <name>
+    ```
+
+    Where `<name>` is one of: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`.
+  </Step>
+
+  <Step title="Add a skill from the registry">
+    Skills extend agents with reusable workflows and specialized knowledge. After initialization completes, install your first skill:
+
+    ```bash
+    npx ai-devkit skill add codeaholicguy/ai-devkit dev-lifecycle
+    ```
+
+    Skills are written as SKILL.md files and placed in the appropriate directory for each configured agent. To see available skills in a registry, browse the registry directly or use the skill commands in the [CLI reference](/cli/skill).
+  </Step>
+
+  <Step title="Verify with lint">
+    Run the lint command to confirm your workspace is correctly configured:
+
+    ```bash
+    npx ai-devkit lint
+    ```
+
+    The lint command checks that all expected configuration files are present and that your workspace meets AI DevKit's requirements. A clean output means your agents are ready to use.
+
+    Example output:
+
+    ```
+    ✔ Configuration file found
+    ✔ Environment templates present
+    ✔ Phase documents present
+    ✔ Workspace ready for AI DevKit workflows
+    ```
+  </Step>
+</Steps>
+
+## What gets created
+
+After initialization, your project will contain:
+
+- **`.ai-devkit.json`** — The AI DevKit configuration file tracking your selected environments, phases, and installed skills.
+- **`docs/ai/`** — Phase context documents (e.g., `requirements.md`, `implementation.md`) that agents reference during development.
+- **Agent configuration files** — Environment-specific context and command files for each agent you selected (e.g., `CLAUDE.md` for Claude Code, `.cursor/rules/` for Cursor).
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Phase-based workflow" icon="list-check" href="/guides/phase-based-workflow">
+    Learn how to use phase documents to guide agents through structured development.
+  </Card>
+  <Card title="Managing skills" icon="puzzle-piece" href="/guides/managing-skills">
+    Browse the skill registry and install community-built agent extensions.
+  </Card>
+  <Card title="Using memory" icon="brain" href="/guides/using-memory">
+    Set up persistent memory so agents retain project knowledge across sessions.
+  </Card>
+  <Card title="Supported agents" icon="robot" href="/supported-agents">
+    Review which agents support which AI DevKit features.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

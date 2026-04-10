@@ -1,0 +1,84 @@
+---
+title: "ai-devkit phase — add or reinitialize a dev phase"
+description: "Add or reinitialize a named phase template. Accepts all seven phase names or shows an interactive prompt. Requires ai-devkit init to run first."
+---
+
+The `phase` command copies a named phase template into your project's docs directory and registers it in `.ai-devkit.json`. Use it when you want to add a phase you skipped during `init`, reinitialize a phase template to restore defaults, or quickly inspect which phases are available. If you omit the phase name, an interactive prompt displays all seven phases and lets you select one.
+
+## Synopsis
+
+```bash
+ai-devkit phase [name]
+```
+
+## Arguments
+
+<ParamField path="name" type="string">
+  The name of the phase to add. Must be one of: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`. If omitted, an interactive list prompt is shown.
+</ParamField>
+
+## Available phases
+
+| Name | Description |
+|---|---|
+| `requirements` | Requirements & Problem Understanding |
+| `design` | System Design & Architecture |
+| `planning` | Project Planning & Task Breakdown |
+| `implementation` | Implementation Guide |
+| `testing` | Testing Strategy |
+| `deployment` | Deployment Strategy |
+| `monitoring` | Monitoring & Observability |
+
+## What it does
+
+When you run `ai-devkit phase`, the command:
+
+1. Verifies that AI DevKit is initialized (`.ai-devkit.json` must exist — run `ai-devkit init` first if not).
+2. Resolves the target phase from the argument or interactive prompt.
+3. If the phase file already exists, asks whether to overwrite it.
+4. Copies the phase template to your configured docs directory.
+5. Registers the phase in `.ai-devkit.json`.
+
+<Note>
+  `ai-devkit phase` requires the project to already be initialized. If you see an error about AI DevKit not being initialized, run `ai-devkit init` first.
+</Note>
+
+## Examples
+
+### Add a phase by name
+
+```bash
+ai-devkit phase implementation
+```
+
+### Use the interactive prompt
+
+Run without arguments to pick from the full list:
+
+```bash
+ai-devkit phase
+```
+
+### Reinitialize an existing phase
+
+If the phase template already exists, the command asks whether to overwrite it:
+
+```bash
+ai-devkit phase testing
+# → Testing Strategy already exists. Overwrite? (y/N)
+```
+
+<Tip>
+  Reinitialization is useful when you want to restore a phase template to its original state after heavy customization — or when a newer version of AI DevKit ships an improved template.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="init" icon="square-terminal" href="/cli/init">
+    Initialize the full project, including selecting multiple phases at once.
+  </Card>
+  <Card title="lint" icon="square-terminal" href="/cli/lint">
+    Validate that your docs structure and phase files are correctly set up.
+  </Card>
+</CardGroup>

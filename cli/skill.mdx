@@ -1,0 +1,214 @@
+---
+title: "ai-devkit skill — install and manage agent skills"
+description: "Manage agent skills from community registries. Install locally or globally. Subcommands: add, list, remove, update, find, rebuild-index."
+---
+
+The `skill` command group manages AI agent skills — reusable `SKILL.md` instruction files that agents load to gain specialized capabilities. Skills are sourced from registry repositories (GitHub repos that follow the AI DevKit skill registry format). You can install them per-project or globally for a specific AI environment.
+
+## Subcommands
+
+- [`skill add`](#skill-add) — Install a skill from a registry
+- [`skill list`](#skill-list) — List installed skills in the current project
+- [`skill remove`](#skill-remove) — Remove an installed skill
+- [`skill update`](#skill-update) — Update skills from their registries
+- [`skill find`](#skill-find) — Search for skills across all registries
+- [`skill rebuild-index`](#skill-rebuild-index) — Rebuild the local skill index (for CI use)
+
+---
+
+## skill add
+
+Install a skill from a registry into the current project or a global environment folder.
+
+### Synopsis
+
+```bash
+ai-devkit skill add <registry-repo> [skill-name] [options]
+```
+
+### Arguments
+
+<ParamField path="registry-repo" type="string" required>
+  The registry repository in `owner/repo` format (e.g., `anthropics/skills`). This is required.
+</ParamField>
+
+<ParamField path="skill-name" type="string">
+  The name of the specific skill to install from that registry. If omitted, an interactive prompt lets you choose from available skills.
+</ParamField>
+
+### Options
+
+<ParamField path="-g, --global" type="boolean">
+  Install the skill into the configured global skill paths (`~/<path>`) instead of the current project.
+</ParamField>
+
+<ParamField path="-e, --env" type="string[]">
+  Target environment(s) for a global install (e.g., `--global --env claude`). Accepts multiple values.
+</ParamField>
+
+### Examples
+
+```bash
+# Install a specific skill from a registry
+ai-devkit skill add anthropics/skills frontend-design
+
+# Interactive selection from a registry
+ai-devkit skill add anthropics/skills
+
+# Install globally for all configured environments
+ai-devkit skill add anthropics/skills tdd-workflow --global
+
+# Install globally for a specific environment
+ai-devkit skill add anthropics/skills code-review --global --env claude
+```
+
+---
+
+## skill list
+
+List all skills installed in the current project.
+
+### Synopsis
+
+```bash
+ai-devkit skill list
+```
+
+    The output is a table showing skill name, the registry it came from, and the environments the skill is active for. If no skills are installed, the command suggests how to add one.
+
+### Examples
+
+```bash
+ai-devkit skill list
+```
+
+---
+
+## skill remove
+
+Remove a skill from the current project.
+
+### Synopsis
+
+```bash
+ai-devkit skill remove <skill-name>
+```
+
+### Arguments
+
+<ParamField path="skill-name" type="string" required>
+  The name of the skill to remove. Use `ai-devkit skill list` to see installed skill names.
+</ParamField>
+
+### Examples
+
+```bash
+ai-devkit skill remove frontend-design
+```
+
+---
+
+## skill update
+
+Update installed skills by pulling the latest versions from their registries.
+
+### Synopsis
+
+```bash
+ai-devkit skill update [registry-id]
+```
+
+### Arguments
+
+<ParamField path="registry-id" type="string">
+  An optional registry identifier to update skills from a specific registry only (e.g., `anthropic/skills`). If omitted, all registries are updated.
+</ParamField>
+
+### Examples
+
+```bash
+# Update all skills from all registries
+ai-devkit skill update
+
+# Update skills from a specific registry
+ai-devkit skill update anthropic/skills
+```
+
+---
+
+## skill find
+
+Search for skills by keyword across all configured registries.
+
+### Synopsis
+
+```bash
+ai-devkit skill find <keyword> [options]
+```
+
+### Arguments
+
+<ParamField path="keyword" type="string" required>
+  The search term to match against skill names and descriptions.
+</ParamField>
+
+### Options
+
+<ParamField path="--refresh" type="boolean">
+  Force a rebuild of the local skill index before searching. Use this if you have recently added a new registry or suspect the index is stale.
+</ParamField>
+
+### Examples
+
+```bash
+# Search for skills related to testing
+ai-devkit skill find testing
+
+# Search with a refreshed index
+ai-devkit skill find tdd --refresh
+```
+
+Results are displayed as a table with skill name, registry, and a truncated description.
+
+---
+
+## skill rebuild-index
+
+Rebuild the local skill index from all configured registries. This command is primarily intended for CI pipelines that need a fresh index without running a full search.
+
+### Synopsis
+
+```bash
+ai-devkit skill rebuild-index [options]
+```
+
+### Options
+
+<ParamField path="--output" type="string">
+  Output path for the generated index file. If omitted, the index is written to the default location.
+</ParamField>
+
+### Examples
+
+```bash
+# Rebuild the index to the default location
+ai-devkit skill rebuild-index
+
+# Write the index to a custom path
+ai-devkit skill rebuild-index --output ./skill-index.json
+```
+
+<Tip>
+  Run `skill rebuild-index` in CI before `skill find` to ensure results reflect the latest state of all registries without relying on a cached index.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="init" icon="square-terminal" href="/cli/init">
+    Skills can be declared in a template and installed automatically during `init`.
+  </Card>
+  <Card title="memory" icon="square-terminal" href="/cli/memory">
+    Complement skills with persistent knowledge stored in the memory service.
+  </Card>
+</CardGroup>

@@ -1,0 +1,85 @@
+---
+title: "ai-devkit lint — check workspace configuration"
+description: "Validate your AI DevKit workspace before an agent session. Checks docs structure and feature conventions. Key flags: --feature, --json."
+---
+
+The `lint` command validates your workspace to confirm it meets AI DevKit's structural requirements before handing work to an AI agent. By default it checks the base docs structure — the presence of required phase files, configuration, and environment templates. With the `--feature` flag it also validates feature-specific documentation files and git worktree naming conventions.
+
+## Synopsis
+
+```bash
+ai-devkit lint [options]
+```
+
+## Options
+
+<ParamField path="-f, --feature" type="string">
+  Validate docs and git worktree conventions for a named feature. When provided, lint checks that the correct feature docs exist and that the git branch or worktree follows the expected naming pattern.
+</ParamField>
+
+<ParamField path="--json" type="boolean">
+  Output lint results as a JSON report instead of the default human-readable format. The JSON output includes a `pass` boolean, a summary with counts of failures and warnings, and a full list of individual check results.
+</ParamField>
+
+## What it checks
+
+Lint runs a series of checks grouped into categories:
+
+**Base structure** — Always run. Verifies that the core AI DevKit setup is present: the `.ai-devkit.json` config file, docs directory, and configured phase and environment files.
+
+**Feature docs** — Run only with `--feature`. Checks that the feature-specific documentation exists and is correctly named.
+
+**Git worktree** — Run only with `--feature`. Checks that the git branch or worktree for the feature follows the naming convention AI DevKit expects.
+
+Each check produces one of three levels:
+
+| Level | Meaning |
+|---|---|
+| Pass | Check succeeded |
+| Warn | Issue detected, but not blocking |
+| Fail | Required check failed — exit code is non-zero |
+
+<Note>
+  `ai-devkit lint` exits with a non-zero code if any required check fails. Warnings do not affect the exit code. This makes it safe to use in CI pipelines as a pre-flight gate.
+</Note>
+
+## Examples
+
+### Validate the base workspace
+
+```bash
+ai-devkit lint
+```
+
+### Validate a feature branch
+
+```bash
+ai-devkit lint --feature user-authentication
+```
+
+### Output results as JSON
+
+```bash
+ai-devkit lint --json
+```
+
+### Use in a CI pipeline
+
+```bash
+ai-devkit lint && echo "Workspace ready" || echo "Lint failed"
+```
+
+<Tip>
+  Run `ai-devkit lint` before starting any agent session to catch configuration issues early. A clean lint output means the agent will have all the context files it needs.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="init" icon="square-terminal" href="/cli/init">
+    Initialize AI DevKit to create the base docs structure that lint validates.
+  </Card>
+  <Card title="phase" icon="square-terminal" href="/cli/phase">
+    Add missing phase files that lint reports as absent.
+  </Card>
+</CardGroup>

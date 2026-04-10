@@ -1,0 +1,91 @@
+---
+title: "Environment codes: AI agent configuration reference"
+description: "Reference for all AI DevKit environment codes. Each code maps to an AI agent and controls where context files, commands, and skills are installed."
+---
+
+An environment code is a short identifier that maps to a specific AI coding agent. When you run `ai-devkit init`, you pass one or more codes to tell the CLI which agents to configure. The CLI then creates the agent's context file, command directory, and skill directory — and keeps them up to date as you add phases and skills.
+
+## Selecting environments at init
+
+Pass a comma-separated list of codes to `ai-devkit init`:
+
+```bash
+ai-devkit init --environment cursor,claude,codex
+```
+
+You can also add an environment to an existing project with `ai-devkit setup`:
+
+```bash
+ai-devkit setup --environment opencode
+```
+
+## Environment code reference
+
+The table below shows every supported environment code, the agent it corresponds to, the context file written to the project root, and the directories used for commands and skills.
+
+| Code | Agent | Context file | Command path | Skill path |
+|---|---|---|---|---|
+| `cursor` | Cursor | `AGENTS.md` | `.cursor/commands/` | `.cursor/skills/` |
+| `claude` | Claude Code | `CLAUDE.md` | `.claude/commands/` | `.claude/skills/` |
+| `github` | GitHub Copilot | `AGENTS.md` | `.github/prompts/` | — |
+| `gemini` | Google Gemini | `GEMINI.md` | `.gemini/commands/` | — |
+| `codex` | OpenAI Codex | `AGENTS.md` | `.codex/commands/` | `.agents/skills/` |
+| `windsurf` | Windsurf | `AGENTS.md` | `.windsurf/commands/` | — |
+| `kilocode` | KiloCode | `AGENTS.md` | `.kilocode/commands/` | — |
+| `amp` | AMP | `AGENTS.md` | `.agents/commands/` | `.agents/skills/` |
+| `opencode` | OpenCode | `AGENTS.md` | `.opencode/commands/` | `.opencode/skills/` |
+| `roo` | Roo Code | `AGENTS.md` | `.roo/commands/` | — |
+| `antigravity` | Antigravity | `AGENTS.md` | `.agent/workflows/` | `.agent/skills/` |
+
+<Note>
+  Most environments use `AGENTS.md` as the shared context file name. Claude Code is the exception — it uses `CLAUDE.md`, which Claude Code reads by default. The `github` environment uses `AGENTS.md` (GitHub Copilot's instruction file format).
+</Note>
+
+## Skill-capable environments
+
+Skills can only be installed in environments that define a skill path. Environments without a skill path in the table above do not support `ai-devkit skill add`.
+
+Skill-capable environments:
+
+- `cursor` — `.cursor/skills/`
+- `claude` — `.claude/skills/`
+- `codex` — `.agents/skills/`
+- `amp` — `.agents/skills/`
+- `opencode` — `.opencode/skills/`
+- `antigravity` — `.agent/skills/`
+
+If you run `ai-devkit skill add` in a project that only has non-skill-capable environments configured, the CLI will report an error. Add at least one skill-capable environment first.
+
+## Global skill installation
+
+Some environments support installing skills globally — into your home directory rather than the project directory — so a skill applies to every project without being committed to version control.
+
+Environments with global skill support:
+
+| Code | Global skill path |
+|---|---|
+| `cursor` | `~/.cursor/skills/` |
+| `claude` | `~/.claude/skills/` |
+| `gemini` | `~/.gemini/skills/` |
+| `codex` | `~/.codex/skills/` |
+| `amp` | `~/.config/agents/skills/` |
+| `opencode` | `~/.config/opencode/skills/` |
+| `antigravity` | `~/.gemini/antigravity/skills/` |
+
+Install a skill globally with the `--global` flag:
+
+```bash
+ai-devkit skill add codeaholicguy/ai-devkit tdd --global --env claude
+```
+
+<Tip>
+  Global skills are a good choice for personal workflow skills — debugging methodologies, commit conventions, code review checklists — that you want available in every project automatically.
+</Tip>
+
+## GitHub Copilot notes
+
+The `github` environment writes commands as `.prompt.md` files to `.github/prompts/` rather than a generic command directory. It does not support skill installation. Context is written to `AGENTS.md` at the project root, which GitHub Copilot reads as its instruction file.
+
+## Antigravity notes
+
+The `antigravity` environment uses `.agent/workflows/` for commands (rather than a `commands/` subdirectory) and stores global commands at `~/.gemini/antigravity/global_workflows/`. Skills are installed at `.agent/skills/` for project scope and `~/.gemini/antigravity/skills/` for global scope.

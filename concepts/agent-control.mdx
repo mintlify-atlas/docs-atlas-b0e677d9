@@ -1,0 +1,111 @@
+---
+title: "Agent control: observe and direct running AI agents"
+description: "AI DevKit's agent control commands let you list running agents, inspect conversation history, focus terminal windows, and send messages to waiting agents."
+---
+
+When you run multiple AI coding agents in parallel — or leave a long-running agent working in the background — it can be difficult to know what each one is doing, whether any are blocked, or how to intervene without switching terminal windows. AI DevKit's agent control commands give you a single interface to observe and interact with every running agent from one place.
+
+## How it works
+
+AI DevKit uses process inspection to detect running agent processes and reads their session files (JSONL conversation logs written to disk) to determine status and conversation history. To send messages, it locates the agent's TTY and writes to it directly, simulating keyboard input.
+
+## Supported agent types
+
+| Agent | Type identifier | Detection method |
+|---|---|---|
+| Claude Code | `claude` | Process inspection + session JSONL files |
+| Codex CLI | `codex` | Process inspection + session JSONL files |
+| Gemini CLI | `gemini_cli` | Process inspection |
+
+<Info>
+  Support for additional agent types is planned. The adapter system is designed so new agents can be added without changing the core commands.
+</Info>
+
+## Agent statuses
+
+Each detected agent is assigned one of four statuses:
+
+| Status | Indicator | Meaning |
+|---|---|---|
+| RUNNING | 🟢 run | Actively executing a task |
+| WAITING | 🟡 wait | Paused, waiting for user input |
+| IDLE | ⚪ idle | Running but not currently working on anything |
+| UNKNOWN | ❓ unknown | Status could not be determined |
+
+## Commands
+
+### List running agents
+
+Show all detected agents with their type, status, working directory, current task summary, and time since last activity.
+
+```bash
+ai-devkit agent list
+```
+
+Output includes a warning if any agents have `WAITING` status — meaning they are blocked and need your attention.
+
+```bash
+# Output as JSON for scripting
+ai-devkit agent list --json
+```
+
+### Focus an agent terminal
+
+Bring an agent's terminal window into focus. Useful when you want to switch context to a specific agent's session without hunting for the right window.
+
+```bash
+ai-devkit agent open my-api
+```
+
+If the name matches more than one running agent, you are prompted to select which one to focus.
+
+### Send a message to an agent
+
+Send a message to an agent that is waiting for input. This writes the message directly to the agent's TTY, as if you typed it in that terminal.
+
+```bash
+ai-devkit agent send "Use the existing auth middleware, don't rewrite it" --id my-api
+```
+
+<Note>
+  `agent send` works most reliably when the agent is in `WAITING` status. If you send to a `RUNNING` agent, a warning is shown but the message is still attempted.
+</Note>
+
+### View conversation history
+
+Inspect the full conversation log for a specific agent. By default, the last 20 messages are shown. Use `--full` to see the entire history.
+
+```bash
+ai-devkit agent detail --id my-api
+```
+
+```bash
+# Show last 50 messages
+ai-devkit agent detail --id my-api --tail 50
+
+# Show entire conversation
+ai-devkit agent detail --id my-api --full
+
+# Include tool call and tool result messages
+ai-devkit agent detail --id my-api --verbose
+
+# Output as JSON for programmatic use
+ai-devkit agent detail --id my-api --json
+```
+
+The detail view shows session metadata (session ID, working directory, start time, last active time, status, and type) followed by the conversation with timestamps and color-coded roles.
+
+## Identifying agents
+
+The `--id` flag and the `<name>` argument in `agent open` both accept partial matches. If your agent is named `my-api-service`, you can use `--id my-api` or `--id api`. When multiple agents match, the commands either prompt you to choose (for `open`) or display an error asking for a more specific identifier (for `send` and `detail`).
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Monitoring agents" icon="terminal" href="/guides/monitoring-agents">
+    A practical guide to using agent control in a multi-agent workflow.
+  </Card>
+  <Card title="CLI: agent command" icon="square-terminal" href="/cli/agent">
+    Full reference for all `ai-devkit agent` subcommands and flags.
+  </Card>
+</CardGroup>

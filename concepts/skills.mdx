@@ -1,0 +1,123 @@
+---
+title: "Agent skills: reusable AI workflows and knowledge"
+description: "Skills are SKILL.md files that give AI agents specialized knowledge and workflows. Install them from community registries with a single command."
+---
+
+A skill is a directory containing a `SKILL.md` file. That file holds specialized instructions, workflows, or reference material that an AI agent reads to gain domain-specific knowledge — for example, a TDD workflow, a debugging methodology, or a technical writing guide. Skills let you encode best practices once and share them across every agent and every project.
+
+## How skills work
+
+Skills live in GitHub repositories called registries. AI DevKit indexes these registries and installs individual skills by symlinking (or copying) the skill directory into each agent's designated skill folder.
+
+<Steps>
+  <Step title="Find a skill">
+    Search across all registered skill sources by keyword. The index is fetched automatically on first use and refreshed every 24 hours.
+    ```bash
+    ai-devkit skill find tdd
+    ```
+  </Step>
+  <Step title="Install a skill">
+    Install by specifying the registry identifier and skill name. AI DevKit clones the registry, locates the skill directory, and symlinks it into each configured agent's skill folder.
+    ```bash
+    ai-devkit skill add codeaholicguy/ai-devkit dev-lifecycle
+    ```
+  </Step>
+  <Step title="Agent reads the skill">
+    Once installed, the agent finds the `SKILL.md` in its skill directory and incorporates the instructions into its working context. No further configuration is required.
+  </Step>
+</Steps>
+
+## Built-in skills from `codeaholicguy/ai-devkit`
+
+The `codeaholicguy/ai-devkit` registry is indexed by default. It ships the following skills:
+
+<CardGroup cols={2}>
+  <Card title="agent-orchestration" icon="diagram-project">
+    Patterns for coordinating multiple AI agents working on the same codebase.
+  </Card>
+  <Card title="capture-knowledge" icon="lightbulb">
+    Guidelines for agents to identify and persist useful project knowledge to memory.
+  </Card>
+  <Card title="debug" icon="bug">
+    A structured debugging methodology for systematically isolating and resolving issues.
+  </Card>
+  <Card title="dev-lifecycle" icon="arrows-rotate">
+    End-to-end development workflow that ties AI DevKit phases together.
+  </Card>
+  <Card title="memory" icon="brain">
+    Instructions for agents on how and when to use the AI DevKit memory service.
+  </Card>
+  <Card title="simplify-implementation" icon="minimize">
+    Heuristics for keeping implementations small, focused, and maintainable.
+  </Card>
+  <Card title="tdd" icon="flask">
+    Test-driven development workflow: write failing tests first, then implement.
+  </Card>
+  <Card title="technical-writer" icon="pen-nib">
+    Style guide and structure for agents that produce documentation.
+  </Card>
+  <Card title="verify" icon="circle-check">
+    Verification checklist agents run before marking a task complete.
+  </Card>
+</CardGroup>
+
+## Where skills are installed
+
+AI DevKit symlinks each skill into the skill directories of every environment configured in your project. The target path depends on the agent:
+
+| Agent | Skill path |
+|---|---|
+| Claude Code (`claude`) | `.claude/skills/<skill-name>/` |
+| Cursor (`cursor`) | `.cursor/skills/<skill-name>/` |
+| OpenAI Codex (`codex`) | `.agents/skills/<skill-name>/` |
+| AMP (`amp`) | `.agents/skills/<skill-name>/` |
+| OpenCode (`opencode`) | `.opencode/skills/<skill-name>/` |
+| Antigravity (`antigravity`) | `.agent/skills/<skill-name>/` |
+
+Environments without a skill path listed (GitHub Copilot, Gemini, Windsurf, KiloCode, Roo Code) do not support local skill installation.
+
+<Tip>
+  Install a skill globally (into your home directory paths) with the `--global` flag so it applies to every project without being committed to version control.
+  ```bash
+  ai-devkit skill add codeaholicguy/ai-devkit tdd --global --env claude
+  ```
+</Tip>
+
+## Managing installed skills
+
+```bash
+# List all skills installed in the current project
+ai-devkit skill list
+
+# Remove a skill from the current project
+ai-devkit skill remove tdd
+
+# Update all skill registries to the latest version
+ai-devkit skill update
+
+# Update a specific registry
+ai-devkit skill update codeaholicguy/ai-devkit
+```
+
+## Adding custom registries
+
+Any GitHub repository that follows the `skills/<name>/SKILL.md` directory convention can be used as a registry. Add it to your project or global configuration, then reference it by its `owner/repo` identifier:
+
+```bash
+ai-devkit skill add your-org/your-skills-repo your-skill-name
+```
+
+<Note>
+  Registry metadata is cached in `~/.ai-devkit/skills.json`. If you add a new registry and do not see its skills, run `ai-devkit skill find <keyword> --refresh` to rebuild the index.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Managing skills" icon="puzzle-piece" href="/guides/managing-skills">
+    A practical guide to installing, updating, and removing skills in your projects.
+  </Card>
+  <Card title="CLI: skill command" icon="square-terminal" href="/cli/skill">
+    Full reference for all `ai-devkit skill` subcommands and flags.
+  </Card>
+</CardGroup>

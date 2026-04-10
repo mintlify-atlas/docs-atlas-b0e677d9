@@ -1,0 +1,77 @@
+---
+title: "AI DevKit development phases: how they work"
+description: "AI DevKit's seven development phases structure agent work from requirements through monitoring. Each phase writes a context document that agents read to understand their role."
+---
+
+Phases are structured markdown context documents that guide an AI agent through a specific stage of your development workflow. When you initialize a phase, AI DevKit writes a template file into your project's docs directory. Agents read that file to understand the goals, constraints, and deliverables expected at that stage — giving every agent the same structured starting point regardless of which tool you use.
+
+## How phases work
+
+Each phase maps to a named template. When you run `ai-devkit phase <name>`, AI DevKit copies the template into your project and registers it in `.ai-devkit.json`. Agents configured with AI DevKit automatically pick up these files as context when they start working.
+
+<Steps>
+  <Step title="Initialize your project">
+    Run `ai-devkit init` to select which phases you want. The wizard lets you choose any combination of the seven phases.
+    ```bash
+    npx ai-devkit@latest init
+    ```
+  </Step>
+  <Step title="Add individual phases later">
+    Add a single phase at any time with `ai-devkit phase <name>`. If you omit the name, an interactive prompt lets you pick from the list.
+    ```bash
+    ai-devkit phase implementation
+    ```
+  </Step>
+  <Step title="Edit the generated file">
+    Each phase creates a markdown file in your `docs/ai/` directory (or the path you configured). Edit it to match your team's standards — agents read the actual file content, so any customization you make is immediately reflected in agent behavior.
+  </Step>
+</Steps>
+
+## The seven phases
+
+<AccordionGroup>
+  <Accordion title="Requirements & Problem Understanding">
+    The `requirements` phase documents what you are building and why. Agents in this phase focus on clarifying the problem, identifying stakeholders, and capturing acceptance criteria before any design or code is written.
+  </Accordion>
+  <Accordion title="System Design & Architecture">
+    The `design` phase captures high-level architecture decisions: component boundaries, data flows, technology choices, and trade-offs. Agents use this context to reason about structure before implementation begins.
+  </Accordion>
+  <Accordion title="Project Planning & Task Breakdown">
+    The `planning` phase translates the design into an actionable task list. Agents in this phase break work into small, independent units with clear dependencies and estimates.
+  </Accordion>
+  <Accordion title="Implementation Guide">
+    The `implementation` phase is the active coding stage. The context document sets coding standards, patterns to follow, and any constraints agents must respect while writing code.
+  </Accordion>
+  <Accordion title="Testing Strategy">
+    The `testing` phase defines how the work should be verified. Agents use this context to write and run tests that match your coverage requirements and testing philosophy.
+  </Accordion>
+  <Accordion title="Deployment Strategy">
+    The `deployment` phase documents how the work reaches production: environment configuration, release process, rollback procedures, and deployment checks.
+  </Accordion>
+  <Accordion title="Monitoring & Observability">
+    The `monitoring` phase captures what to watch after release — metrics, alerts, dashboards, and on-call runbooks. Agents use this to instrument code and set up observability as part of the feature work.
+  </Accordion>
+</AccordionGroup>
+
+## Phase commands
+
+| Command | What it does |
+|---|---|
+| `ai-devkit init` | Guided setup — select phases to initialize alongside environments |
+| `ai-devkit phase <name>` | Add or reinitialize a single named phase |
+| `ai-devkit phase` | Interactive prompt to pick a phase from the full list |
+
+<Note>
+  If a phase file already exists, `ai-devkit phase` asks before overwriting it. This lets you safely reinitialize a phase template without accidentally losing your customizations.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Phase-based workflow" icon="list-check" href="/guides/phase-based-workflow">
+    A practical guide to structuring an end-to-end feature with AI DevKit phases.
+  </Card>
+  <Card title="CLI: phase command" icon="square-terminal" href="/cli/phase">
+    Full reference for `ai-devkit phase` flags and options.
+  </Card>
+</CardGroup>

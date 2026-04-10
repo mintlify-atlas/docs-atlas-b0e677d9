@@ -1,0 +1,115 @@
+---
+title: "Bootstrap projects from AI DevKit init templates"
+description: "Use init templates to apply a standard set of environments, phases, and skills in one command. Ideal for team onboarding and CI workflows."
+---
+
+Templates let you encode your team's standard AI DevKit configuration in a single file and replay it across any project. Instead of going through the interactive `init` prompts every time, you point `ai-devkit init` at a template and it sets up environments, phases, skill installations, and paths in one step. This is especially useful for team onboarding and CI workflows.
+
+## Running init with a template
+
+Pass the path to your template file with `--template`:
+
+```bash
+ai-devkit init --template path/to/template.yaml
+```
+
+The CLI reads the template, validates it, and then:
+
+1. Sets up the listed environments.
+2. Creates context documents for each listed phase.
+3. Installs each listed skill from its registry.
+4. Applies any custom `paths` configuration.
+
+If the project is already initialized, template mode proceeds without interactive prompts and overwrites existing phase files.
+
+## Template schema
+
+Templates are YAML or JSON files. The following fields are supported:
+
+<ParamField body="environments" type="string[]">
+  List of environment codes to configure. Valid values: `cursor`, `claude`, `github`, `gemini`, `codex`, `windsurf`, `kilocode`, `amp`, `opencode`, `roo`, `antigravity`.
+</ParamField>
+
+<ParamField body="phases" type="string[]">
+  List of development phases to initialize. Valid values: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`.
+</ParamField>
+
+<ParamField body="skills" type="object[]">
+  List of skills to install. Each entry must have a `registry` (the GitHub `owner/repo` identifier) and a `skill` (the skill name within that registry).
+</ParamField>
+
+<ParamField body="paths.docs" type="string">
+  Override the default docs directory (`docs/ai`). All phase documents and environment context files will be written here.
+</ParamField>
+
+<ParamField body="version" type="string | number">
+  Optional version label for the template file. Not validated against AI DevKit's version — use it for your own tracking.
+</ParamField>
+
+## Example template
+
+```yaml
+environments:
+  - claude
+  - cursor
+phases:
+  - requirements
+  - design
+  - planning
+  - implementation
+  - testing
+skills:
+  - registry: codeaholicguy/ai-devkit
+    skill: dev-lifecycle
+  - registry: codeaholicguy/ai-devkit
+    skill: tdd
+paths:
+  docs: docs/ai
+```
+
+Save this as `ai-devkit-template.yaml` and run:
+
+```bash
+ai-devkit init --template ai-devkit-template.yaml
+```
+
+## Reproducible installs with ai-devkit install
+
+Once a project is initialized and `.ai-devkit.json` records the installed skills, you can restore the exact set of skills on any machine using `ai-devkit install`:
+
+```bash
+ai-devkit install --config .ai-devkit.json
+```
+
+This reads the `skills` array from `.ai-devkit.json` and reinstalls each one — useful in CI environments, new developer machines, or after cloning a repository.
+
+<Tip>
+  Commit your `.ai-devkit.json` to version control. Any team member can run `ai-devkit install` after cloning to get the same skill setup as everyone else.
+</Tip>
+
+## Template best practices
+
+- **Keep one template per team standard.** If your backend and frontend teams have different conventions, maintain separate templates rather than one large one.
+- **Version your templates.** Use the `version` field and commit templates alongside your team's tooling configuration.
+- **Test templates in CI.** Running `ai-devkit init --template template.yaml` in a CI job confirms the template is valid and all listed skills are installable.
+
+<Note>
+  Templates support YAML (`.yaml` / `.yml`), JSON (`.json`), and files without an extension (parsed as YAML first, then JSON). Unknown fields in a template file are rejected with a validation error.
+</Note>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="init command" icon="terminal" href="/cli/init">
+    Full CLI reference for `ai-devkit init`, including all flags.
+  </Card>
+  <Card title="install command" icon="terminal" href="/cli/install">
+    Full CLI reference for `ai-devkit install`.
+  </Card>
+  <Card title="Configuration" icon="settings" href="/guides/configuration">
+    Understand the `.ai-devkit.json` config file that templates produce.
+  </Card>
+  <Card title="Managing skills" icon="box" href="/guides/managing-skills">
+    Learn more about how skills are installed and managed.
+  </Card>
+</CardGroup>

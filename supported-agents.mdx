@@ -1,0 +1,48 @@
+---
+title: "Supported AI coding agents: setup and control matrix"
+description: "AI DevKit supports Claude Code, Cursor, Codex, Gemini CLI, Windsurf, and more. Compare which agents support environment setup and agent control features."
+---
+
+AI DevKit is designed to work across the most widely used AI coding agents. Each supported agent gets its own configuration files, context documents, and command templates — all generated automatically by `ai-devkit init`. The table below shows which features are available for each agent.
+
+## Feature support
+
+| Agent | Agent Setup | Agent Control |
+|---|---|---|
+| [Claude Code](https://www.anthropic.com/claude-code) | ✅ Supported | ✅ Ready |
+| [Codex CLI](https://github.com/openai/codex) | ✅ Supported | ✅ Ready |
+| [GitHub Copilot](https://code.visualstudio.com/) | ✅ Supported | ❌ Not ready |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | ✅ Supported | ❌ Not ready |
+| [Cursor](https://cursor.sh/) | ✅ Supported | ❌ Not ready |
+| [opencode](https://opencode.ai/) | ✅ Supported | ❌ Not ready |
+| [Antigravity](https://antigravity.google/) | ✅ Supported | ❌ Not ready |
+| [Windsurf](https://windsurf.com/) | 🚧 Testing | ❌ Not ready |
+| [Kilo Code](https://github.com/Kilo-Org/kilocode) | 🚧 Testing | ❌ Not ready |
+| [Roo Code](https://roocode.com/) | 🚧 Testing | ❌ Not ready |
+| [Amp](https://ampcode.com/) | 🚧 Testing | ❌ Not ready |
+
+<Info>
+  More agents are coming. If your preferred agent is not listed, open an issue or a pull request on the [AI DevKit GitHub repository](https://github.com/codeaholicguy/ai-devkit).
+</Info>
+
+## What each feature means
+
+**Agent Setup** means AI DevKit can write configuration files, context documents, and command templates for that agent when you run `ai-devkit init`. Agents marked as "Supported" are stable and actively maintained. Agents marked as "Testing" are functional but may have rough edges — feedback is welcome.
+
+**Agent Control** means AI DevKit can interact with a running agent session from the CLI — for example, sending instructions, inspecting the active conversation, or monitoring agent progress. This feature requires the agent to expose a supported control interface. Currently only Claude Code and Codex CLI meet this requirement.
+
+## Selecting agents during init
+
+When you run `npx ai-devkit@latest init`, you choose one or more agents interactively:
+
+```bash
+npx ai-devkit@latest init
+```
+
+You can also specify agents directly using the `--environment` flag with a comma-separated list of environment codes:
+
+```bash
+npx ai-devkit@latest init --environment claude,cursor,codex
+```
+
+Valid environment codes are: `claude`, `cursor`, `github`, `gemini`, `codex`, `opencode`, `antigravity`, `windsurf`, `kilocode`, `roo`, `amp`.

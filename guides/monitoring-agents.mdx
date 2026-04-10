@@ -1,0 +1,144 @@
+---
+title: "Monitor and control running AI agents with CLI"
+description: "Use ai-devkit agent commands to list active agents, inspect conversation history, focus agent terminals, and send messages to agents waiting for input."
+---
+
+When you have multiple AI agents running across different terminals or projects, keeping track of what each one is doing can be difficult. AI DevKit's `agent` commands give you a unified view of all running agents — their status, what they are working on, and how recently they were active — and let you interact with them without switching windows manually.
+
+<Note>
+  Full agent monitoring support is available for **Claude Code** and **Codex**. Other agent types may appear in the list but have limited support for conversation history and message sending.
+</Note>
+
+## Listing running agents
+
+Run `agent list` to see all currently active agents detected on your system:
+
+```bash
+ai-devkit agent list
+```
+
+The output is a table with one row per agent:
+
+```
+Running Agents:
+
+Agent     CWD               Type        Status       Working On             Active
+claude    ~/projects/api    Claude Code  🟢 run       Writing tests for...   2m ago
+codex-1   ~/projects/ui     Codex        🟡 wait      Waiting for input      5m ago
+```
+
+The columns are:
+
+| Column | Description |
+|---|---|
+| **Agent** | The agent's identifier name |
+| **CWD** | The working directory the agent was started in |
+| **Type** | The agent tool: Claude Code, Codex, Gemini CLI, or Other |
+| **Status** | Current state — see the status table below |
+| **Working On** | The first line of the agent's current task summary |
+| **Active** | Time elapsed since the agent was last active |
+
+To get the full data as JSON (useful for scripting):
+
+```bash
+ai-devkit agent list --json
+```
+
+## Agent statuses
+
+| Status | Indicator | Meaning |
+|---|---|---|
+| `RUNNING` | 🟢 run | The agent is actively processing — it is thinking or writing |
+| `WAITING` | 🟡 wait | The agent has paused and is waiting for user input |
+| `IDLE` | ⚪ idle | The agent is running but not currently doing anything |
+| `UNKNOWN` | ❓ unknown | The agent's status could not be determined |
+
+## Viewing agent details
+
+Use `agent detail` to see the full conversation history for a specific agent:
+
+```bash
+ai-devkit agent detail --id "claude"
+```
+
+This shows session metadata — session ID, working directory, start time, last active time, status, and type — followed by the last 20 messages in the conversation.
+
+```
+Agent Detail
+────────────────────────────
+  Session ID:  sess_abc123
+  CWD:         ~/projects/api
+  Start Time:  4/10/2026, 10:00:00 AM
+  Last Active: 2m ago
+  Status:      🟢 run
+  Type:        Claude Code
+```
+
+Additional options for `agent detail`:
+
+- `--full` — Show the entire conversation history, not just the last 20 messages.
+- `--tail <n>` — Show the last `n` messages (default: 20).
+- `--verbose` — Include tool call and tool result details in the conversation view.
+- `--json` — Output the full detail as JSON.
+
+## Sending a message to an agent
+
+When an agent is in `WAITING` status, you can send it a message directly from the CLI without switching to its terminal:
+
+```bash
+ai-devkit agent send "Continue with the test implementation" --id "claude"
+```
+
+The message is written directly to the agent's terminal input. If the agent is not in `WAITING` status, the CLI shows a warning but sends the message anyway.
+
+<Warning>
+  `agent send` writes to the agent's TTY. Use it only when you intend to provide input — sending unexpected messages to an actively running agent may interrupt its current task.
+</Warning>
+
+## Focusing an agent terminal
+
+To bring an agent's terminal window to the foreground:
+
+```bash
+ai-devkit agent open claude
+```
+
+AI DevKit looks up the agent's process ID, finds the terminal window it is running in, and focuses it. This works on macOS and Linux desktop environments with supported terminal emulators.
+
+If multiple agents match the name you provide, the CLI shows an interactive list so you can choose the one you want to focus.
+
+## Full workflow example
+
+<Steps>
+  <Step title="Check what is running">
+    ```bash
+    ai-devkit agent list
+    ```
+  </Step>
+  <Step title="Inspect a specific agent">
+    ```bash
+    ai-devkit agent detail --id "claude"
+    ```
+  </Step>
+  <Step title="Send input to a waiting agent">
+    ```bash
+    ai-devkit agent send "Continue with the test implementation" --id "claude"
+    ```
+  </Step>
+  <Step title="Switch to its terminal">
+    ```bash
+    ai-devkit agent open claude
+    ```
+  </Step>
+</Steps>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="agent command" icon="terminal" href="/cli/agent">
+    Full CLI reference for all `ai-devkit agent` subcommands.
+  </Card>
+  <Card title="Agent control concept" icon="book" href="/concepts/agent-control">
+    Conceptual overview of how agent monitoring works.
+  </Card>
+</CardGroup>

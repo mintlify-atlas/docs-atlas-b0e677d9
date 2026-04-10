@@ -1,0 +1,111 @@
+---
+title: "Phase-based development workflow"
+description: "Structure AI-assisted development into seven phases — from requirements through monitoring. Each phase generates a context document agents read to understand their role."
+---
+
+AI DevKit structures development work into seven ordered phases. Each phase has a dedicated Markdown document in your docs directory that your AI agent reads to understand what it should focus on at that stage of the project. This keeps agents aligned with where you are in the development lifecycle rather than requiring you to re-explain context in every session.
+
+## The seven phases
+
+| Phase | Display name | Purpose |
+|---|---|---|
+| `requirements` | Requirements & Problem Understanding | Clarify the problem, gather requirements, define success criteria |
+| `design` | System Design & Architecture | Design the system structure, data models, and component interfaces |
+| `planning` | Project Planning & Task Breakdown | Break work into tasks, estimate effort, sequence dependencies |
+| `implementation` | Implementation Guide | Conventions, patterns, and constraints for writing code |
+| `testing` | Testing Strategy | Test approach, coverage goals, and testing tooling |
+| `deployment` | Deployment Strategy | How the application is built, packaged, and deployed |
+| `monitoring` | Monitoring & Observability | Alerting, logging, metrics, and on-call runbooks |
+
+## Working through the lifecycle
+
+<Steps>
+  <Step title="Initialize your project with phases">
+    Run `ai-devkit init` and select the phases that apply to your project. AI DevKit writes a template Markdown file for each selected phase to your docs directory (default: `docs/ai/`).
+
+    ```bash
+    ai-devkit init
+    ```
+
+    To initialize all phases at once without the interactive prompt:
+
+    ```bash
+    ai-devkit init --phases requirements,design,planning,implementation,testing
+    ```
+  </Step>
+
+  <Step title="Edit the requirements document">
+    Open `docs/ai/requirements.md` and fill in the problem statement, user stories, and success criteria for your project or feature. This document is what your AI agent reads at the start of every session to understand the goal.
+
+    ```markdown
+    ## Problem Statement
+    Describe the core problem or pain point...
+
+    ## User Stories
+    As a developer, I want to...
+    ```
+  </Step>
+
+  <Step title="Move to design and planning">
+    Once requirements are settled, fill in `docs/ai/design.md` with your architecture decisions — data models, component boundaries, and API contracts. Then move to `docs/ai/planning.md` to break the work into concrete tasks with priorities and dependencies.
+
+    Your agent reads these documents together, so it understands not just what to build but how the pieces fit together.
+  </Step>
+
+  <Step title="Work through implementation, testing, and beyond">
+    The `docs/ai/implementation.md` file is where you record coding conventions, preferred patterns, and constraints specific to your codebase. Keep it updated as architectural decisions evolve.
+
+    The `testing.md`, `deployment.md`, and `monitoring.md` phases follow the same pattern — each is a living document your agent reads to stay aligned with how your team operates.
+  </Step>
+
+  <Step title="Add a single phase later">
+    You don't have to initialize all phases up front. Add any phase at any time with the `phase` command:
+
+    ```bash
+    ai-devkit phase implementation
+    ```
+
+    If you omit the phase name, the CLI shows an interactive list of available phases to choose from.
+  </Step>
+
+  <Step title="Check workspace readiness with lint">
+    The `lint` command validates that your workspace is properly set up — checking that required context documents exist and are filled in before you start working on a task:
+
+    ```bash
+    ai-devkit lint
+    ```
+
+    To check readiness for a specific feature:
+
+    ```bash
+    ai-devkit lint --feature my-feature
+    ```
+
+    Lint catches missing or empty phase documents before an agent session starts, saving you from context-free conversations.
+  </Step>
+</Steps>
+
+## Keeping phase documents current
+
+Phase documents are living files — they should evolve as the project does. Update `requirements.md` when scope changes. Update `implementation.md` when your team adopts new conventions. The AI agent reads the current state of these files at the start of each session, so keeping them accurate directly improves the quality of AI assistance.
+
+<Tip>
+  Commit your phase documents to version control alongside your code. This gives your whole team — and every agent session — the same shared context.
+</Tip>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="phase command" icon="terminal" href="/cli/phase">
+    Full reference for the `ai-devkit phase` command.
+  </Card>
+  <Card title="lint command" icon="terminal" href="/cli/lint">
+    Full reference for the `ai-devkit lint` command.
+  </Card>
+  <Card title="Phases concept" icon="book" href="/concepts/phases">
+    Conceptual overview of how phases work.
+  </Card>
+  <Card title="Templates" icon="copy" href="/guides/templates">
+    Bootstrap projects with a predefined set of phases.
+  </Card>
+</CardGroup>

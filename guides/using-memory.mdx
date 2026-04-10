@@ -1,0 +1,124 @@
+---
+title: "Using AI DevKit memory: store and search knowledge"
+description: "AI DevKit's memory persists project knowledge across sessions. Store facts and decisions, then search and recall them in any future agent session."
+---
+
+AI agents start each session without memory of previous conversations. This means you end up re-explaining project decisions, repeating architectural context, and re-establishing constraints every time you open a new chat. AI DevKit's memory service solves this by giving you a persistent, searchable knowledge store that agents can query at the start of a session.
+
+## Storing knowledge
+
+Use `memory store` to save a piece of knowledge. Each item has a title, content, optional tags for categorization, and a scope that controls visibility:
+
+```bash
+ai-devkit memory store \
+  --title "Database connection pool config" \
+  --content "We use a pool of 10 connections max. Set in config/database.ts." \
+  --tags "database,config" \
+  --scope "project:my-app"
+```
+
+The command outputs the stored item as JSON, including the assigned `id` you can use to update it later:
+
+```json
+{
+  "id": "mem_abc123",
+  "title": "Database connection pool config",
+  "content": "We use a pool of 10 connections max. Set in config/database.ts.",
+  "tags": ["database", "config"],
+  "scope": "project:my-app",
+  "createdAt": "2026-04-10T10:00:00.000Z"
+}
+```
+
+### Content guidelines
+
+- **Title**: 10–100 characters. Write it as a searchable label.
+- **Content**: 50–5,000 characters. Include enough detail that the agent can act on it without follow-up.
+- **Tags**: Comma-separated keywords that help with filtering and relevance ranking.
+
+## Searching memory
+
+Use `memory search` to find stored items by natural language query:
+
+```bash
+ai-devkit memory search --query "database connection" --scope "project:my-app"
+```
+
+The command returns ranked results as JSON. To get a quick table view instead, add `--table`:
+
+```bash
+ai-devkit memory search --query "connection pool" --table
+```
+
+The table output shows each item's ID, title, and scope — useful for quickly identifying items to update or review:
+
+```
+id           title                              scope
+mem_abc123   Database connection pool config    project:my-app
+```
+
+Additional search options:
+
+- `--tags <tags>` — Boost results that match these tags.
+- `--limit <n>` — Return at most `n` results (1–20, default: 5).
+
+## Updating a memory item
+
+Update the title, content, tags, or scope of an existing item using its ID:
+
+```bash
+ai-devkit memory update --id mem_abc123 --content "Updated content here."
+```
+
+All fields are optional in an update — only the fields you provide are changed.
+
+## Understanding scopes
+
+Scopes let you control which items an agent sees when searching. Three scope formats are supported:
+
+| Scope | Example | When to use |
+|---|---|---|
+| `global` | `global` | Knowledge that applies across all projects |
+| `project:<name>` | `project:my-app` | Knowledge specific to one application |
+| `repo:<name>` | `repo:api-service` | Knowledge specific to one repository |
+
+When searching without a `--scope` filter, all items visible in the current context are returned.
+
+## Configuring the memory database path
+
+By default, the memory service stores its SQLite database at `~/.ai-devkit/memory.db`. To use a project-local database or a custom path, set `memory.path` in `.ai-devkit.json`:
+
+```json
+{
+  "memory": {
+    "path": ".ai-devkit/memory.db"
+  }
+}
+```
+
+Relative paths are resolved from the directory containing `.ai-devkit.json`. Absolute paths are used as-is.
+
+## MCP server mode
+
+The `@ai-devkit/memory` package can also run as a Model Context Protocol (MCP) server. In MCP mode, the memory service exposes `store`, `search`, and `update` as tools that an AI agent can call directly — without requiring you to run CLI commands manually. This lets agents like Claude Code write to and query memory autonomously during a session.
+
+Run the memory package directly to start the MCP server:
+
+```bash
+npx @ai-devkit/memory
+```
+
+<Note>
+  The MCP server reads from and writes to the same SQLite database as the CLI commands. Items stored with `ai-devkit memory store` are immediately available to the MCP server, and vice versa.
+</Note>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="memory command" icon="terminal" href="/cli/memory">
+    Full CLI reference for all `ai-devkit memory` subcommands.
+  </Card>
+  <Card title="Memory concept" icon="book" href="/concepts/memory">
+    Conceptual overview of how the memory service works.
+  </Card>
+</CardGroup>

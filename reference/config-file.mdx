@@ -1,0 +1,159 @@
+---
+title: ".ai-devkit.json: complete configuration reference"
+description: "Full field reference for .ai-devkit.json. Covers environments, phases, skills, paths.docs, memory.path, and custom registries with defaults and examples."
+---
+
+AI DevKit stores all project-level configuration in a single JSON file, `.ai-devkit.json`, at the root of your repository. The CLI creates this file when you run `ai-devkit init` and updates it automatically as you add environments, phases, and skills. You can also edit it directly for settings the CLI does not expose through flags.
+
+## Example
+
+This is the `.ai-devkit.json` from the AI DevKit repository itself:
+
+```json
+{
+  "version": "0.4.2",
+  "environments": [
+    "cursor",
+    "claude",
+    "github",
+    "gemini",
+    "codex",
+    "antigravity"
+  ],
+  "createdAt": "2025-12-28T13:35:45.251Z",
+  "updatedAt": "2026-04-03T18:41:38.363Z",
+  "phases": [
+    "requirements",
+    "design",
+    "planning",
+    "implementation",
+    "testing"
+  ],
+  "skills": [
+    { "registry": "codeaholicguy/ai-devkit", "name": "memory" },
+    { "registry": "codeaholicguy/ai-devkit", "name": "dev-lifecycle" }
+  ]
+}
+```
+
+## Field reference
+
+<ParamField body="version" type="string" required>
+  The AI DevKit version that created or last modified this config file. Updated automatically on every write. Do not change this value by hand.
+</ParamField>
+
+<ParamField body="environments" type="string[]" required>
+  The AI agent environments configured for this project. Each code determines which directories and files AI DevKit creates and manages. Valid values: `cursor`, `claude`, `github`, `gemini`, `codex`, `windsurf`, `kilocode`, `amp`, `opencode`, `roo`, `antigravity`. See [environment codes](/reference/environment-codes) for per-environment path details.
+</ParamField>
+
+<ParamField body="phases" type="string[]" required>
+  The development phases initialized in this project. Each entry corresponds to a phase context document written to your docs directory. Valid values: `requirements`, `design`, `planning`, `implementation`, `testing`, `deployment`, `monitoring`.
+</ParamField>
+
+<ParamField body="skills" type="object[]">
+  The skills installed in this project. Each entry is an object with a `registry` identifier and a `name`. This list lets `ai-devkit install` reproduce the full skill set in a fresh checkout.
+
+  ```json
+  "skills": [
+    { "registry": "codeaholicguy/ai-devkit", "name": "tdd" },
+    { "registry": "anthropics/skills", "name": "frontend-design" }
+  ]
+  ```
+</ParamField>
+
+<ParamField body="paths.docs" type="string" default="docs/ai">
+  The directory where AI DevKit writes phase context documents and agent configuration files. Accepts any relative path from the project root.
+
+  ```json
+  "paths": {
+    "docs": "docs/ai"
+  }
+  ```
+</ParamField>
+
+<ParamField body="memory.path" type="string">
+  The path to the SQLite database file used by the memory service. Accepts an absolute path or a path relative to the project root. When omitted, the memory service defaults to `~/.ai-devkit/memory.db`.
+
+  ```json
+  "memory": {
+    "path": ".ai-devkit/memory.db"
+  }
+  ```
+</ParamField>
+
+<ParamField body="registries" type="object">
+  Custom skill registries to merge with the default registry. Each key is the `owner/repo` registry identifier used with `ai-devkit skill add`, and each value is the Git URL of the repository. Project registries take priority over both the global config and the default registry. See [skill registries](/reference/skill-registries) for more details.
+
+  ```json
+  "registries": {
+    "myorg/internal-skills": "https://github.com/myorg/internal-skills.git"
+  }
+  ```
+</ParamField>
+
+<ParamField body="createdAt" type="string">
+  ISO 8601 timestamp set when the config file was first created. Managed automatically — do not edit.
+</ParamField>
+
+<ParamField body="updatedAt" type="string">
+  ISO 8601 timestamp updated on every write to the config file. Managed automatically — do not edit.
+</ParamField>
+
+<Note>
+  Most fields in `.ai-devkit.json` are written and maintained by the CLI. You only need to edit the file directly for `paths.docs`, `memory.path`, and `registries`, which have no dedicated CLI flags for post-init changes.
+</Note>
+
+## Customizing the docs directory
+
+By default, AI DevKit writes phase documents and agent context files to `docs/ai/`. Pass `--docs-dir` to `init` to change this:
+
+```bash
+ai-devkit init --docs-dir .ai/docs
+```
+
+To change the directory in an existing project, edit `paths.docs` in `.ai-devkit.json` directly and move your existing phase files to the new location.
+
+<Tip>
+  Commit `.ai-devkit.json` to version control. It records the exact environments, phases, and skills used in the project, and `ai-devkit install` uses it to restore skills in fresh checkouts.
+</Tip>
+
+## Configuring the memory database path
+
+By default, the memory database is stored at `~/.ai-devkit/memory.db` — shared across all your projects. To give a project its own isolated database, set `memory.path` to a project-relative path:
+
+```json
+{
+  "memory": {
+    "path": ".ai-devkit/memory.db"
+  }
+}
+```
+
+You can also use an absolute path if you want to store the database outside the project directory.
+
+## Adding custom skill registries
+
+To use skills from a private or third-party repository, add the repository to the `registries` field:
+
+```json
+{
+  "version": "0.4.2",
+  "environments": ["claude"],
+  "phases": ["requirements"],
+  "registries": {
+    "myorg/internal-skills": "https://github.com/myorg/internal-skills.git"
+  }
+}
+```
+
+Once added, install skills from your registry the same way you would any other:
+
+```bash
+ai-devkit skill add myorg/internal-skills my-skill-name
+```
+
+Project-level registries are merged with global registries (from `~/.ai-devkit/.ai-devkit.json`) and the default registry. Project registries take the highest priority, which means you can override a public registry entry with a private fork.
+
+<Note>
+  Every repository used as a registry must follow the `skills/<name>/SKILL.md` directory convention. The CLI validates that `SKILL.md` exists before installing any skill.
+</Note>

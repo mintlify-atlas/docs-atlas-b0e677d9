@@ -1,0 +1,149 @@
+---
+title: "Skill registries: discovery, indexing, and custom repos"
+description: "AI DevKit discovers skills through GitHub registries using a SKILL.md convention. Learn how the skills index works and how to add custom registries."
+---
+
+A skill registry is a GitHub repository that contains a `skills/` directory. Each subdirectory inside `skills/` is a skill — a folder with at least one `SKILL.md` file that holds instructions, workflows, or reference material for an AI agent. Any GitHub repository that follows this layout can act as a registry.
+
+## The default registry
+
+AI DevKit ships with a curated list of registries published at:
+
+```
+https://raw.githubusercontent.com/codeaholicguy/ai-devkit/main/skills/registry.json
+```
+
+This file maps registry identifiers to Git URLs. When you run `ai-devkit skill add <registry> <skill>`, the CLI fetches this file, looks up the Git URL for the registry you specified, and clones it to a local cache at `~/.ai-devkit/skills/`.
+
+Notable registries in the default list:
+
+| Registry | Description |
+|---|---|
+| `codeaholicguy/ai-devkit` | AI DevKit's own skills: `dev-lifecycle`, `tdd`, `debug`, `memory`, `verify`, and more |
+| `anthropics/skills` | Anthropic's official skills: frontend design, MCP builder, document tools, and more |
+| `obra/superpowers` | Development workflow skills: TDD, brainstorming, systematic debugging, git worktrees |
+| `softaworks/agent-toolkit` | Extensive toolkit: commit workflows, architecture diagrams, Jira, daily standups, and more |
+| `vercel-labs/agent-skills` | React and Next.js patterns from Vercel Engineering |
+| `supabase/agent-skills` | Supabase and Postgres best practices |
+| `antfu/skills` | Anthony Fu's JavaScript/TypeScript tooling conventions |
+
+## The skills index
+
+To make discovery fast, AI DevKit maintains a local index of all skills across all registered repositories. The index is stored at `~/.ai-devkit/skills.json`.
+
+On first use, the CLI downloads a pre-built seed index from:
+
+```
+https://raw.githubusercontent.com/codeaholicguy/ai-devkit/main/skills/index.json
+```
+
+After that, the index is refreshed automatically every 24 hours. Each entry in the index records the skill name, registry, file path, and a description extracted from `SKILL.md`.
+
+## Searching the index
+
+Use `ai-devkit skill find` to search the index by keyword. The CLI matches against both skill names and descriptions:
+
+```bash
+ai-devkit skill find tdd
+ai-devkit skill find "code review"
+ai-devkit skill find debugging
+```
+
+To bypass the 24-hour TTL and force a full rebuild from all registries:
+
+```bash
+ai-devkit skill find --refresh tdd
+```
+
+<Tip>
+  Use `--refresh` after adding a new custom registry to include its skills in the index immediately.
+</Tip>
+
+## Rebuilding the index (CI)
+
+In CI environments, you may want to rebuild the index from scratch and write it to a known path:
+
+```bash
+ai-devkit skill rebuild-index
+```
+
+This fetches HEAD SHAs for every registry, diffs against the existing index, and fetches only the skill files that have changed. The result is written to `~/.ai-devkit/skills.json` by default.
+
+## Adding a custom registry
+
+You can add any GitHub repository as a registry at the project level (in `.ai-devkit.json`) or at the global level (in `~/.ai-devkit/.ai-devkit.json`).
+
+### Project-level registry
+
+Add a `registries` field to `.ai-devkit.json`:
+
+```json
+{
+  "version": "0.4.2",
+  "environments": ["claude", "cursor"],
+  "phases": ["requirements", "implementation"],
+  "registries": {
+    "myorg/my-skills": "https://github.com/myorg/my-skills.git"
+  }
+}
+```
+
+### Global registry
+
+Add registries to `~/.ai-devkit/.ai-devkit.json` to make them available in all your projects:
+
+```json
+{
+  "skills": {
+    "registries": {
+      "myorg/my-skills": "https://github.com/myorg/my-skills.git"
+    }
+  }
+}
+```
+
+### Registry priority
+
+When the CLI merges registries, it applies this priority order (highest to lowest):
+
+1. Project-level registries (`.ai-devkit.json`)
+2. Global registries (`~/.ai-devkit/.ai-devkit.json`)
+3. Default registry (`registry.json` fetched from GitHub)
+
+This means you can override a public registry entry — for example, to point at an internal fork — without modifying the default registry.
+
+## What makes a valid skill
+
+A registry must follow this layout:
+
+```
+my-skills/
+└── skills/
+    ├── my-skill/
+    │   └── SKILL.md        ← required
+    └── another-skill/
+        ├── SKILL.md        ← required
+        └── additional-files/
+```
+
+The CLI validates two things before installing a skill:
+
+1. The skill directory exists under `skills/` in the cloned repository.
+2. The directory contains a `SKILL.md` file.
+
+The `SKILL.md` file should begin with a description that summarizes when the skill applies. The CLI extracts this description to populate the skills index and display it in `ai-devkit skill find` results.
+
+<Note>
+  Skills are installed as symlinks to the local cache at `~/.ai-devkit/skills/<registry>/<skill>`. If symlinking fails (for example, on certain Windows configurations), the CLI falls back to copying the directory.
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Managing skills" icon="puzzle-piece" href="/guides/managing-skills">
+    A practical guide to installing, searching, and removing skills.
+  </Card>
+  <Card title="Config file reference" icon="file-code" href="/reference/config-file">
+    Full reference for `.ai-devkit.json`, including the `registries` field.
+  </Card>
+</CardGroup>

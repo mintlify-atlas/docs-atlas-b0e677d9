@@ -1,0 +1,186 @@
+---
+title: "ai-devkit memory — store and search agent knowledge"
+description: "Store, update, and search knowledge in AI DevKit's memory service. Scoped storage, tag filtering, and full-text search. Subcommands: store, update, search."
+---
+
+The `memory` command group interacts with AI DevKit's local knowledge memory service — a persistent, SQLite-backed store that lets agents save and retrieve project knowledge across sessions. Each knowledge item has a title, content, optional tags, and a scope that controls visibility. Agents can query the store with `memory search` to surface relevant context before starting a task.
+
+## Subcommands
+
+- [`memory store`](#memory-store) — Save a new knowledge item
+- [`memory update`](#memory-update) — Update an existing knowledge item
+- [`memory search`](#memory-search) — Search the knowledge store
+
+---
+
+## memory store
+
+Save a new knowledge item to the local memory store.
+
+### Synopsis
+
+```bash
+ai-devkit memory store [options]
+```
+
+### Options
+
+<ParamField path="-t, --title" type="string" required>
+  Title of the knowledge item. Must be between 10 and 100 characters.
+</ParamField>
+
+<ParamField path="-c, --content" type="string" required>
+  Content of the knowledge item. Must be between 50 and 5000 characters.
+</ParamField>
+
+<ParamField path="--tags" type="string">
+  Comma-separated tags to categorize the item (e.g., `"api,backend"`). Tags help boost relevance during search.
+</ParamField>
+
+<ParamField path="-s, --scope" type="string" default="global">
+  Scope controls where the memory item is visible. Accepts:
+  - `global` — available across all projects
+  - `project:<name>` — scoped to a named project
+  - `repo:<name>` — scoped to a named repository
+</ParamField>
+
+### Output
+
+The command outputs the stored item as JSON, including its assigned `id`, which you need if you want to update the item later.
+
+### Examples
+
+```bash
+# Store a global knowledge item
+ai-devkit memory store \
+  --title "API authentication pattern" \
+  --content "All API calls use Bearer token auth. Tokens are JWTs signed with RS256 and expire after 1 hour." \
+  --tags "api,auth,backend"
+
+# Store a project-scoped item
+ai-devkit memory store \
+  --title "Database migration convention" \
+  --content "Run migrations with: npm run db:migrate. Always back up before migrating in production." \
+  --scope "project:my-app"
+```
+
+---
+
+## memory update
+
+Update an existing knowledge item by ID.
+
+### Synopsis
+
+```bash
+ai-devkit memory update [options]
+```
+
+### Options
+
+<ParamField path="--id" type="string" required>
+  The ID of the knowledge item to update. You can find IDs using `memory search --table`.
+</ParamField>
+
+<ParamField path="-t, --title" type="string">
+  New title for the item. Must be between 10 and 100 characters.
+</ParamField>
+
+<ParamField path="-c, --content" type="string">
+  New content for the item. Must be between 50 and 5000 characters.
+</ParamField>
+
+<ParamField path="--tags" type="string">
+  Comma-separated new tags. This replaces all existing tags on the item.
+</ParamField>
+
+<ParamField path="-s, --scope" type="string">
+  New scope for the item. Accepts `global`, `project:<name>`, or `repo:<name>`.
+</ParamField>
+
+### Output
+
+The command outputs the updated item as JSON.
+
+### Examples
+
+```bash
+# Update the content of an existing item
+ai-devkit memory update --id abc123 --content "Updated content here, at least fifty characters long."
+
+# Change the scope and add new tags
+ai-devkit memory update --id abc123 --scope "project:my-app" --tags "api,auth"
+```
+
+<Note>
+  Updating `--tags` replaces all existing tags on the item. To keep existing tags, include them in the new value.
+</Note>
+
+---
+
+## memory search
+
+Search the local knowledge store using a text query.
+
+### Synopsis
+
+```bash
+ai-devkit memory search [options]
+```
+
+### Options
+
+<ParamField path="-q, --query" type="string" required>
+  The search query. Must be between 3 and 500 characters.
+</ParamField>
+
+<ParamField path="--tags" type="string">
+  Comma-separated context tags to boost relevance of items that have matching tags.
+</ParamField>
+
+<ParamField path="-s, --scope" type="string">
+  Filter results to a specific scope (e.g., `global`, `project:my-app`, or `repo:my-repo`).
+</ParamField>
+
+<ParamField path="-l, --limit" type="number" default="5">
+  Maximum number of results to return. Must be between 1 and 20.
+</ParamField>
+
+<ParamField path="--table" type="boolean">
+  Display results as a table showing `id`, `title`, and `scope` instead of the default JSON output. Useful for quickly identifying item IDs before an update.
+</ParamField>
+
+### Output
+
+By default, results are returned as JSON with full item data. With `--table`, a compact table is shown instead.
+
+### Examples
+
+```bash
+# Basic search
+ai-devkit memory search --query "authentication"
+
+# Search within a project scope
+ai-devkit memory search --query "database" --scope "project:my-app"
+
+# Boost results matching specific tags and increase the limit
+ai-devkit memory search --query "api" --tags "backend" --limit 10
+
+# Show results as a table for easy ID lookup
+ai-devkit memory search --query "auth" --table
+```
+
+<Tip>
+  Use `--table` when you need to copy an item ID for `memory update`. The compact view makes scanning IDs much faster than parsing raw JSON.
+</Tip>
+
+## Related commands
+
+<CardGroup cols={2}>
+  <Card title="skill" icon="square-terminal" href="/cli/skill">
+    Use skills alongside memory to give agents both reusable capabilities and persistent project knowledge.
+  </Card>
+  <Card title="agent" icon="square-terminal" href="/cli/agent">
+    Monitor running agents and send them memory search results as messages.
+  </Card>
+</CardGroup>
